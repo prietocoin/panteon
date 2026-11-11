@@ -81,6 +81,61 @@ PANTEON_SEED=false
 `PANTEON_SEED=false` evita que el contenedor cree un caso demo al arrancar. Cámbialo
 a `true` si quieres un caso de ejemplo en el primer despliegue.
 
+## Guionista LLM y voz
+
+El modo escenas puede usar un LLM para escribir ~2.000 palabras y repartirlas en
+6–8 bloques de duración variable. Funciona con cualquier endpoint OpenAI-compatible.
+
+### DeepSeek (barato, recomendado para empezar)
+
+```env
+PANTEON_LLM_BASE_URL=https://api.deepseek.com/v1
+PANTEON_LLM_MODEL=deepseek-chat
+PANTEON_LLM_API_KEY=...
+```
+
+### Gemini Flash
+
+```env
+PANTEON_LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
+PANTEON_LLM_MODEL=gemini-2.5-flash
+PANTEON_LLM_API_KEY=...
+```
+
+### Kimi / Moonshot
+
+```env
+PANTEON_LLM_BASE_URL=https://api.moonshot.ai/v1
+PANTEON_LLM_MODEL=moonshot-v1-8k
+PANTEON_LLM_API_KEY=...
+```
+
+### Ollama local
+
+```env
+PANTEON_LLM_BASE_URL=http://host.docker.internal:11434/v1
+PANTEON_LLM_MODEL=llama3.1
+PANTEON_LLM_API_KEY=ollama
+```
+
+Si faltan las tres variables, Cervantes usa el guionista determinista y la UI muestra
+`LLM OFF`.
+
+### Voz real
+
+El TTS **está en el repo pero no se despliega solo**. Para tener voz:
+
+1. Despliega `services/pavarotti` (Chatterbox) como segundo servicio.
+2. En `panteon`, define:
+
+```env
+PANTEON_TTS_URL=http://chatterbox_tts:8000
+```
+
+3. En el formulario de render elige TTS `http`.
+
+Si `PANTEON_TTS_URL` no está definida, la UI usa `tone` (placeholder sin voz).
+
 ## Notificaciones y PWA
 
 - PWA: la UI se instala desde el navegador del móvil (manifest + service worker).

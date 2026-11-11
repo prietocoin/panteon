@@ -33,23 +33,25 @@ type Progress struct {
 
 // Config controla una ejecución completa del pipeline.
 type Config struct {
-	OutDir      string
-	ClipSeconds float64
-	FPS         int
-	Width       int
-	Height      int
-	Voice       string
-	SynthName   string
-	Renderer    pixar.Renderer
-	Encoder     encoder.Encoder
-	Synth       pavarotti.Synthesizer
-	Mixer       mozart.Mixer
-	Atlas       atlas.Builder
-	ClipCopies  int
-	SceneMode   bool
-	AllowReview bool
-	Progress    func(Progress)
-	Now         func() time.Time
+	OutDir        string
+	ClipSeconds   float64
+	FPS           int
+	Width         int
+	Height        int
+	Voice         string
+	SynthName     string
+	Renderer      pixar.Renderer
+	Encoder       encoder.Encoder
+	Synth         pavarotti.Synthesizer
+	Mixer         mozart.Mixer
+	Atlas         atlas.Builder
+	ClipCopies    int
+	SceneMode     bool
+	TargetMinutes int
+	LLM           cervantes.ScriptWriter
+	AllowReview   bool
+	Progress      func(Progress)
+	Now           func() time.Time
 }
 
 // Pipeline orquesta las fases desde un engineering_case hasta el contenedor final.
@@ -100,6 +102,9 @@ func New(config Config) (*Pipeline, error) {
 	}
 	if config.ClipCopies <= 0 {
 		config.ClipCopies = 1
+	}
+	if config.TargetMinutes <= 0 {
+		config.TargetMinutes = 12
 	}
 	if config.FPS > 120 || config.Width > 7680 || config.Height > 4320 {
 		return nil, fmt.Errorf("pipeline: configuración fuera de rango")
@@ -157,10 +162,13 @@ func (p *Pipeline) Run(ctx context.Context, engineeringCase contract.Engineering
 	report("atlas", "Dossier técnico listo", 0, 0, 6)
 
 	cut, err := cervantes.Write(dossier, cervantes.Options{
-		ClipSeconds: p.config.ClipSeconds,
-		Copies:      p.config.ClipCopies,
-		SceneMode:   p.config.SceneMode,
-		Now:         p.config.Now,
+		ClipSeconds:   p.config.ClipSeconds,
+		Copies:        p.config.ClipCopies,
+		SceneMode:     p.config.SceneMode,
+		TargetMinutes: p.config.TargetMinutes,
+		LLM:           p.config.LLM,
+		Context:       ctx,
+		Now:           p.config.Now,
 	})
 	if err != nil {
 		return contract.RunManifest{}, err

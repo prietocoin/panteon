@@ -17,7 +17,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 COPY --from=build /out/panteon /usr/local/bin/panteon
 
-ENV PANTEON_TTS_URL=http://pavarotti:8000
 ENV PANTEON_SEED=false
 EXPOSE 8080
 

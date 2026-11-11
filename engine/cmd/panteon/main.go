@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"elpanteon/engine/internal/atlas"
+	"elpanteon/engine/internal/cervantes"
 	"elpanteon/engine/internal/encoder"
 	"elpanteon/engine/internal/galileo"
 	"elpanteon/engine/internal/galileo/contract"
@@ -128,26 +129,27 @@ func runGalileo(args []string) error {
 }
 
 type pipelineFlags struct {
-	out         string
-	clipSeconds float64
-	clipCopies  int
-	fps         int
-	width       int
-	height      int
-	renderer    string
-	encoder     string
-	tts         string
-	ttsURL      string
-	voice       string
-	chrome      string
-	atlasMode   string
-	repo        string
-	ref         string
-	githubToken string
-	sceneMode   bool
-	allowReview bool
-	timeout     time.Duration
-	keepAwake   bool
+	out           string
+	clipSeconds   float64
+	clipCopies    int
+	fps           int
+	width         int
+	height        int
+	renderer      string
+	encoder       string
+	tts           string
+	ttsURL        string
+	voice         string
+	chrome        string
+	atlasMode     string
+	repo          string
+	ref           string
+	githubToken   string
+	sceneMode     bool
+	targetMinutes int
+	allowReview   bool
+	timeout       time.Duration
+	keepAwake     bool
 }
 
 func (f *pipelineFlags) register(flags *flag.FlagSet, defaultOut string) {
@@ -168,6 +170,7 @@ func (f *pipelineFlags) register(flags *flag.FlagSet, defaultOut string) {
 	flags.StringVar(&f.ref, "ref", "", "rama, tag o commit para --atlas github")
 	flags.StringVar(&f.githubToken, "github-token", "", "token de GitHub (o variable GITHUB_TOKEN)")
 	flags.BoolVar(&f.sceneMode, "scene-mode", false, "genera escenas de duración variable según la narración")
+	flags.IntVar(&f.targetMinutes, "target-minutes", 12, "duración objetivo del guion LLM")
 	flags.BoolVar(&f.allowReview, "allow-review", false, "permite producir casos marcados para revisión")
 	flags.DurationVar(&f.timeout, "timeout", 3*time.Hour, "timeout total del pipeline")
 	flags.BoolVar(&f.keepAwake, "keep-awake", true, "evita la suspensión del sistema durante el render")
@@ -175,16 +178,18 @@ func (f *pipelineFlags) register(flags *flag.FlagSet, defaultOut string) {
 
 func (f pipelineFlags) config() (pipeline.Config, error) {
 	config := pipeline.Config{
-		OutDir:      f.out,
-		ClipSeconds: f.clipSeconds,
-		ClipCopies:  f.clipCopies,
-		FPS:         f.fps,
-		Width:       f.width,
-		Height:      f.height,
-		Voice:       f.voice,
-		SynthName:   f.tts,
-		SceneMode:   f.sceneMode,
-		AllowReview: f.allowReview,
+		OutDir:        f.out,
+		ClipSeconds:   f.clipSeconds,
+		ClipCopies:    f.clipCopies,
+		FPS:           f.fps,
+		Width:         f.width,
+		Height:        f.height,
+		Voice:         f.voice,
+		SynthName:     f.tts,
+		SceneMode:     f.sceneMode,
+		TargetMinutes: f.targetMinutes,
+		LLM:           cervantes.NewLLMWriterFromEnv(),
+		AllowReview:   f.allowReview,
 	}
 	switch f.atlasMode {
 	case "deterministic":

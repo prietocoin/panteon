@@ -109,7 +109,8 @@ function paintHealth(summary) {
       <span class="chip">Casos <strong>${summary.cases}</strong></span>
       <span class="chip">Jobs activos <strong>${summary.active_jobs}</strong></span>
       <span class="chip">FFmpeg <strong>${summary.ffmpeg ? 'ON' : 'OFF'}</strong></span>
-      <span class="chip">Chromium <strong>${summary.chrome ? 'ON' : 'OFF'}</strong></span>`;
+      <span class="chip">Chromium <strong>${summary.chrome ? 'ON' : 'OFF'}</strong></span>
+      <span class="chip">LLM <strong>${summary.llm ? 'ON' : 'OFF'}</strong></span>`;
   }
 }
 
@@ -559,11 +560,15 @@ function wireClipPreviews() {
 function renderFormHTML(data) {
   const summary = state.summary || {};
   const ttsURL = summary.tts_url || 'http://localhost:8000';
+  const ttsSelected = summary.tts_configured ? 'http' : 'tone';
+  const llmText = summary.llm
+    ? `Guionista LLM activo: ${summary.llm_model || 'modelo configurado'}.`
+    : 'LLM no configurado: se usará el guionista determinista.';
   return `
     <div class="note-box">
       En <strong>modo escenas</strong> la duración de cada bloque sale de la narración y del TTS:
       puede ser 60 s, 115 s, 3 min o lo que pida el texto. No se fuerza un clip fijo.
-      Para 12 minutos hace falta un guion completo; el modo escenas respeta su duración real.
+      ${esc(llmText)}
     </div>
     <form id="render-form" class="form-grid" style="margin-top:18px">
       <label class="span-3" style="flex-direction:row;align-items:center;gap:10px;text-transform:none;letter-spacing:normal">
@@ -572,6 +577,7 @@ function renderFormHTML(data) {
       </label>
       <label id="clip-seconds-field">Segundos por clip <input name="clip_seconds" type="number" min="0.25" max="30" step="0.25" value="2.5"></label>
       <label id="clip-copies-field">Copias de la secuencia <input name="clip_copies" type="number" min="1" max="100" value="1"></label>
+      <label id="target-minutes-field">Duración objetivo (min) <input name="target_minutes" type="number" min="1" max="30" value="12"></label>
       <label>FPS <input name="fps" type="number" min="1" max="120" value="12"></label>
       <label>Ancho <input name="width" type="number" min="64" max="3840" value="640"></label>
       <label>Alto <input name="height" type="number" min="64" max="2160" value="360"></label>
@@ -590,8 +596,8 @@ function renderFormHTML(data) {
       </label>
       <label>TTS
         <select name="tts">
-          <option value="tone">tone (offline)</option>
-          <option value="http">http</option>
+          <option value="tone" ${ttsSelected === 'tone' ? 'selected' : ''}>tone (offline)</option>
+          <option value="http" ${ttsSelected === 'http' ? 'selected' : ''}>http (Chatterbox/TTS)</option>
         </select>
       </label>
       <label>Voz <input name="voice" value="default"></label>
@@ -621,6 +627,7 @@ function wireRenderForm(id) {
     const fixed = !sceneMode.checked;
     $('#clip-seconds-field').hidden = !fixed;
     $('#clip-copies-field').hidden = !fixed;
+    $('#target-minutes-field').hidden = fixed;
   };
   sceneMode.addEventListener('change', syncMode);
   syncMode();
@@ -643,6 +650,7 @@ function wireRenderForm(id) {
       tts_url: body.get('tts_url'),
       chrome: body.get('chrome'),
       scene_mode: body.get('scene_mode') === 'on',
+      target_minutes: Number(body.get('target_minutes')),
     };
     const errorBox = $('#render-error');
     errorBox.innerHTML = '';

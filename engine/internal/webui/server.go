@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"elpanteon/engine/internal/atlas"
+	"elpanteon/engine/internal/cervantes"
 	"elpanteon/engine/internal/encoder"
 	"elpanteon/engine/internal/galileo"
 	"elpanteon/engine/internal/galileo/contract"
@@ -110,13 +111,16 @@ func (s *Server) Handler() http.Handler {
 }
 
 type summaryResponse struct {
-	Cases      int    `json:"cases"`
-	Jobs       int    `json:"jobs"`
-	ActiveJobs int    `json:"active_jobs"`
-	FFmpeg     bool   `json:"ffmpeg"`
-	Chrome     bool   `json:"chrome"`
-	Workspace  string `json:"workspace"`
-	TTSURL     string `json:"tts_url"`
+	Cases         int    `json:"cases"`
+	Jobs          int    `json:"jobs"`
+	ActiveJobs    int    `json:"active_jobs"`
+	FFmpeg        bool   `json:"ffmpeg"`
+	Chrome        bool   `json:"chrome"`
+	Workspace     string `json:"workspace"`
+	TTSURL        string `json:"tts_url"`
+	TTSConfigured bool   `json:"tts_configured"`
+	LLM           bool   `json:"llm"`
+	LLMModel      string `json:"llm_model"`
 }
 
 func (s *Server) handleHealth(writer http.ResponseWriter, _ *http.Request) {
@@ -126,17 +130,22 @@ func (s *Server) handleHealth(writer http.ResponseWriter, _ *http.Request) {
 func (s *Server) handleSummary(writer http.ResponseWriter, _ *http.Request) {
 	cases, _ := s.listCases()
 	ttsURL := strings.TrimSpace(os.Getenv("PANTEON_TTS_URL"))
+	ttsConfigured := ttsURL != ""
 	if ttsURL == "" {
 		ttsURL = "http://localhost:8000"
 	}
+	llm := cervantes.NewLLMWriterFromEnv()
 	writeJSON(writer, http.StatusOK, summaryResponse{
-		Cases:      len(cases),
-		Jobs:       len(s.jobs.list()),
-		ActiveJobs: s.jobs.activeCount(),
-		FFmpeg:     encoder.Select("auto").Name() == "ffmpeg",
-		Chrome:     pixar.FindChrome() != "",
-		Workspace:  s.workspace,
-		TTSURL:     ttsURL,
+		Cases:         len(cases),
+		Jobs:          len(s.jobs.list()),
+		ActiveJobs:    s.jobs.activeCount(),
+		FFmpeg:        encoder.Select("auto").Name() == "ffmpeg",
+		Chrome:        pixar.FindChrome() != "",
+		Workspace:     s.workspace,
+		TTSURL:        ttsURL,
+		TTSConfigured: ttsConfigured,
+		LLM:           llm != nil,
+		LLMModel:      os.Getenv("PANTEON_LLM_MODEL"),
 	})
 }
 
@@ -293,21 +302,22 @@ func (s *Server) handleReview(writer http.ResponseWriter, request *http.Request)
 }
 
 type renderRequest struct {
-	ClipSeconds float64 `json:"clip_seconds"`
-	ClipCopies  int     `json:"clip_copies"`
-	FPS         int     `json:"fps"`
-	Width       int     `json:"width"`
-	Height      int     `json:"height"`
-	Renderer    string  `json:"renderer"`
-	Encoder     string  `json:"encoder"`
-	TTS         string  `json:"tts"`
-	TTSURL      string  `json:"tts_url"`
-	Voice       string  `json:"voice"`
-	Atlas       string  `json:"atlas"`
-	Repo        string  `json:"repo"`
-	Ref         string  `json:"ref"`
-	Chrome      string  `json:"chrome"`
-	SceneMode   bool    `json:"scene_mode"`
+	ClipSeconds   float64 `json:"clip_seconds"`
+	ClipCopies    int     `json:"clip_copies"`
+	FPS           int     `json:"fps"`
+	Width         int     `json:"width"`
+	Height        int     `json:"height"`
+	Renderer      string  `json:"renderer"`
+	Encoder       string  `json:"encoder"`
+	TTS           string  `json:"tts"`
+	TTSURL        string  `json:"tts_url"`
+	Voice         string  `json:"voice"`
+	Atlas         string  `json:"atlas"`
+	Repo          string  `json:"repo"`
+	Ref           string  `json:"ref"`
+	Chrome        string  `json:"chrome"`
+	SceneMode     bool    `json:"scene_mode"`
+	TargetMinutes int     `json:"target_minutes"`
 }
 
 func (s *Server) handleRender(writer http.ResponseWriter, request *http.Request) {
@@ -578,14 +588,16 @@ func (s *Server) runRender(jobID string, engineeringCase contract.EngineeringCas
 
 func (s *Server) buildConfig(payload renderRequest) (pipeline.Config, error) {
 	config := pipeline.Config{
-		ClipSeconds: payload.ClipSeconds,
-		ClipCopies:  payload.ClipCopies,
-		FPS:         payload.FPS,
-		Width:       payload.Width,
-		Height:      payload.Height,
-		Voice:       payload.Voice,
-		SynthName:   payload.TTS,
-		SceneMode:   payload.SceneMode,
+		ClipSeconds:   payload.ClipSeconds,
+		ClipCopies:    payload.ClipCopies,
+		FPS:           payload.FPS,
+		Width:         payload.Width,
+		Height:        payload.Height,
+		Voice:         payload.Voice,
+		SynthName:     payload.TTS,
+		SceneMode:     payload.SceneMode,
+		TargetMinutes: payload.TargetMinutes,
+		LLM:           cervantes.NewLLMWriterFromEnv(),
 	}
 	if config.ClipSeconds == 0 {
 		config.ClipSeconds = 2.5

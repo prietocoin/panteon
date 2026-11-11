@@ -119,6 +119,29 @@ completo; el modo escenas no rellena con repeticiones.
 Los casos también se pueden crear por API (`POST /api/cases`) y el dashboard los
 detecta automáticamente con un aviso.
 
+## Guionista LLM y voz
+
+El modo escenas puede usar un LLM OpenAI-compatible para escribir el guion completo
+y repartirlo en bloques de 60–180 s. Configura en el servicio `panteon`:
+
+```env
+PANTEON_LLM_BASE_URL=https://api.deepseek.com/v1
+PANTEON_LLM_MODEL=deepseek-chat
+PANTEON_LLM_API_KEY=...
+```
+
+También funciona con Gemini (endpoint OpenAI), Kimi/Moonshot y Ollama. Si faltan las
+variables, se usa el guionista determinista y la UI muestra `LLM OFF`.
+
+La **voz no está activa por defecto**: el TTS `tone` es un placeholder. Para voz real
+hay que desplegar `services/pavarotti` (Chatterbox) y definir:
+
+```env
+PANTEON_TTS_URL=http://chatterbox_tts:8000
+```
+
+Luego se elige TTS `http` en el render. Detalles en [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
 ## Watcher de fuentes
 
 La página **Fuentes** permite añadir:

@@ -1,6 +1,7 @@
 package cervantes
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -19,7 +20,13 @@ type Options struct {
 	Copies int
 	// SceneMode genera escenas/bloques de duración variable según la narración.
 	SceneMode bool
-	Now       func() time.Time
+	// TargetMinutes es la duración objetivo para el guionista LLM.
+	TargetMinutes int
+	// LLM es el guionista opcional; si falla se usa el escritor determinista.
+	LLM ScriptWriter
+	// Context permite cancelar la llamada al LLM.
+	Context context.Context
+	Now     func() time.Time
 }
 
 // Write convierte un dossier técnico en un director_cut con escenas y clips atómicos.
@@ -28,6 +35,15 @@ func Write(dossier contract.Dossier, opts Options) (contract.DirectorCut, error)
 		return contract.DirectorCut{}, fmt.Errorf("cervantes: %w", err)
 	}
 	if opts.SceneMode {
+		ctx := opts.Context
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		if opts.LLM != nil {
+			if cut, err := opts.LLM.Write(ctx, dossier, opts); err == nil && cut.Validate() == nil {
+				return cut, nil
+			}
+		}
 		return writeSceneCut(dossier, opts)
 	}
 

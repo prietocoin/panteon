@@ -188,6 +188,21 @@ produce un vídeo corto (el caso de prueba genera ~114 s en 6 escenas). Para 12 
 hace falta un guion completo de ~1.800–2.000 palabras, que debe escribir un LLM o una
 persona. No se rellena con repeticiones.
 
+## Guionista LLM
+
+`cervantes.LLMWriter` usa cualquier endpoint OpenAI-compatible (DeepSeek, Gemini
+OpenAI, Kimi/Moonshot, Ollama). Variables:
+
+```env
+PANTEON_LLM_BASE_URL=...
+PANTEON_LLM_MODEL=...
+PANTEON_LLM_API_KEY=...
+```
+
+Si el LLM falla o no está configurado, se usa el guionista determinista de 6 escenas.
+El resultado del LLM se valida contra el contrato `director_cut`; si no valida, también
+cae al fallback.
+
 ## Ingesta de casos
 
 Un caso puede entrar de tres formas:
