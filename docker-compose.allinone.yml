@@ -1,0 +1,28 @@
+services:
+  panteon:
+    build:
+      context: .
+      dockerfile: Dockerfile.allinone
+      args:
+        TORCH_INDEX_URL: ${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cpu}
+    ports:
+      - "8080:8080"
+    environment:
+      CHATTERBOX_DEVICE: ${CHATTERBOX_DEVICE:-cpu}
+      CHATTERBOX_LANGUAGE: ${CHATTERBOX_LANGUAGE:-es}
+      TORCH_THREADS: ${TORCH_THREADS:-4}
+      PANTEON_LLM_BASE_URL: ${PANTEON_LLM_BASE_URL:-}
+      PANTEON_LLM_MODEL: ${PANTEON_LLM_MODEL:-}
+      PANTEON_LLM_API_KEY: ${PANTEON_LLM_API_KEY:-}
+      PANTEON_NOTIFY_WEBHOOK: ${PANTEON_NOTIFY_WEBHOOK:-}
+      PANTEON_TELEGRAM_TOKEN: ${PANTEON_TELEGRAM_TOKEN:-}
+      PANTEON_TELEGRAM_CHAT_ID: ${PANTEON_TELEGRAM_CHAT_ID:-}
+    volumes:
+      - panteon_workspace:/workspace
+      - chatterbox_models:/models
+      - ./services/pavarotti/voices:/voices
+    restart: unless-stopped
+
+volumes:
+  panteon_workspace:
+  chatterbox_models:

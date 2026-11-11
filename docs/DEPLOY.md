@@ -1,6 +1,61 @@
 # Despliegue all-in-one
 
-El repo contiene dos servicios:
+El repo contiene dos formas de despliegue:
+
+1. **Un solo servicio** con `Dockerfile.allinone`: Go + Chatterbox en el mismo contenedor.
+2. **Dos servicios** con `docker-compose.yml`: Panteón y Pavarotti separados.
+
+## Un solo servicio (recomendado para Easypanel)
+
+En el servicio `panteon`:
+
+```text
+Build:            Dockerfile
+Dockerfile path:  Dockerfile.allinone
+Puerto:           8080
+Volúmenes:        /workspace, /models y /voices
+```
+
+Variables opcionales:
+
+```env
+CHATTERBOX_DEVICE=cpu
+CHATTERBOX_LANGUAGE=es
+TORCH_THREADS=4
+PANTEON_LLM_BASE_URL=...
+PANTEON_LLM_MODEL=...
+PANTEON_LLM_API_KEY=...
+PANTEON_NOTIFY_WEBHOOK=...
+```
+
+El contenedor arranca:
+
+```text
+Chatterbox TTS  -> 127.0.0.1:8000 (interno)
+Panteón        -> 0.0.0.0:8080  (único puerto expuesto)
+```
+
+`PANTEON_TTS_URL` ya viene configurada a `http://127.0.0.1:8000`. La UI mostrará
+**TTS ON** y el render puede usar TTS `http` con voz.
+
+Después de desplegar esta versión, **elimina el servicio `chatterbox_tts`** de
+Easypanel. Ya no es necesario.
+
+Advertencias:
+
+- La imagen es grande (Python + PyTorch + Chatterbox + FFmpeg).
+- El primer arranque descarga el modelo en `/models` y puede tardar varios minutos.
+- En CPU necesita varios GB de RAM; para producción considera GPU.
+- El healthcheck de Docker solo comprueba Panteón; espera a que el TTS termine de cargar
+  antes del primer render.
+
+Con Docker Compose:
+
+```bash
+docker compose -f docker-compose.allinone.yml up --build
+```
+
+## Dos servicios
 
 | Servicio | Puerto | Rol |
 |---|---:|---|

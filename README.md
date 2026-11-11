@@ -92,15 +92,18 @@ Pavarotti          Da Vinci
 
 ## All-in-one con Docker
 
+Un solo servicio (Go + Chatterbox dentro del mismo contenedor):
+
 ```bash
-cp .env.example .env
-docker compose up --build
+docker compose -f docker-compose.allinone.yml up --build
 ```
 
-Levanta `panteon` (UI/API en `:8080`) y `pavarotti` (Chatterbox Multilingual TTS en
-`:8000`, con UI Gradio en `/ui` y alias en `:7860`). El contenedor de Panteón recibe
-`PANTEON_TTS_URL=http://pavarotti:8000`. Detalles, Easypanel y GPU en
-[`docs/DEPLOY.md`](docs/DEPLOY.md).
+O en Easypanel: Dockerfile `Dockerfile.allinone`, puerto 8080, volúmenes
+`/workspace`, `/models` y `/voices`. El TTS queda interno en `127.0.0.1:8000` y no
+necesitas un segundo servicio. Detalles en [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
+También existe el modo de dos servicios (`docker-compose.yml`) si prefieres separar
+el motor del TTS.
 
 ## UI web
 
