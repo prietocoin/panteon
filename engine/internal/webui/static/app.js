@@ -738,8 +738,11 @@ async function sourcesView() {
     button.disabled = true;
     try {
       await api('/api/sources', { method: 'POST', body: JSON.stringify(payload) });
-      toast('Fuente añadida', 'ok');
+      toast('Fuente añadida; comprobando ahora…', 'ok');
       await sourcesView();
+      setTimeout(() => {
+        if (location.hash.startsWith('#/sources')) sourcesView().catch((error) => console.error(error));
+      }, 4000);
     } catch (error) {
       errorBox.innerHTML = `<div class="error-box">${esc(error.message)}</div>`;
       toast(error.message, 'error');
@@ -752,6 +755,9 @@ async function sourcesView() {
     try {
       await api('/api/sources/check', { method: 'POST', body: '{}' });
       toast('Comprobación iniciada; revisa los eventos en unos segundos', 'ok');
+      setTimeout(() => {
+        if (location.hash.startsWith('#/sources')) sourcesView().catch((error) => console.error(error));
+      }, 4000);
     } catch (error) {
       toast(error.message, 'error');
     }

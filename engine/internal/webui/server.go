@@ -434,6 +434,11 @@ func (s *Server) handleAddSource(writer http.ResponseWriter, request *http.Reque
 		writeError(writer, http.StatusBadRequest, err.Error())
 		return
 	}
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+		defer cancel()
+		_, _ = s.ingest.RunOnce(ctx, true)
+	}()
 	writeJSON(writer, http.StatusCreated, sourceItem)
 }
 
