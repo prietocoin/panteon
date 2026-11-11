@@ -24,7 +24,7 @@ function fileURL(path) {
 function fmtDate(value) {
   if (!value) return '—';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
+  if (Number.isNaN(date.getTime()) || date.getFullYear() < 2000) return '—';
   return date.toLocaleString('es', { dateStyle: 'short', timeStyle: 'short' });
 }
 
@@ -774,11 +774,14 @@ async function sourcesView() {
 
 function sourceRowHTML(source) {
   const target = source.type === 'github' ? source.repo : source.url;
+  const checked = source.last_checked_at && new Date(source.last_checked_at).getFullYear() > 2000
+    ? fmtDate(source.last_checked_at)
+    : 'nunca comprobada';
   return `
     <div class="job-row">
       <div class="job-main">
         <div class="job-title">${esc(source.name)} ${badge(source.type)} ${source.enabled ? '' : badge('disabled')}</div>
-        <div class="job-meta">${esc(target)} · cada ${esc(source.interval_minutes)} min · auto ${source.auto_create ? 'ON' : 'OFF'} · ${esc(fmtDate(source.last_checked_at))}</div>
+        <div class="job-meta">${esc(target)} · cada ${esc(source.interval_minutes)} min · auto ${source.auto_create ? 'ON' : 'OFF'} · ${esc(checked)}</div>
         ${source.last_error ? `<div class="error-box" style="margin:8px 0 0">${esc(source.last_error)}</div>` : ''}
       </div>
       <div class="actions">
