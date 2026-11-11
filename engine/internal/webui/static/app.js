@@ -110,6 +110,7 @@ function paintHealth(summary) {
       <span class="chip">Jobs activos <strong>${summary.active_jobs}</strong></span>
       <span class="chip">FFmpeg <strong>${summary.ffmpeg ? 'ON' : 'OFF'}</strong></span>
       <span class="chip">Chromium <strong>${summary.chrome ? 'ON' : 'OFF'}</strong></span>
+      <span class="chip">TTS <strong>${summary.tts_configured ? 'ON' : 'OFF'}</strong></span>
       <span class="chip">LLM <strong>${summary.llm ? 'ON' : 'OFF'}</strong></span>`;
   }
 }
