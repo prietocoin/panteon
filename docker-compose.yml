@@ -8,6 +8,9 @@ services:
     environment:
       PANTEON_TTS_URL: http://pavarotti:8000
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      PANTEON_NOTIFY_WEBHOOK: ${PANTEON_NOTIFY_WEBHOOK:-}
+      PANTEON_TELEGRAM_TOKEN: ${PANTEON_TELEGRAM_TOKEN:-}
+      PANTEON_TELEGRAM_CHAT_ID: ${PANTEON_TELEGRAM_CHAT_ID:-}
     volumes:
       - panteon_workspace:/workspace
     depends_on:

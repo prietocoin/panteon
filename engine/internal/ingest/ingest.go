@@ -100,11 +100,16 @@ func New(dir string, extractor extract.Extractor, saveCase func(contract.Enginee
 		return nil, err
 	}
 	service := &Service{
-		dir:       dir,
-		sources:   make([]Source, 0),
-		seen:      make(map[string]time.Time),
-		events:    make([]Event, 0),
-		client:    &http.Client{Timeout: 30 * time.Second},
+		dir:     dir,
+		sources: make([]Source, 0),
+		seen:    make(map[string]time.Time),
+		events:  make([]Event, 0),
+		client: &http.Client{
+			Timeout: 30 * time.Second,
+			CheckRedirect: func(request *http.Request, via []*http.Request) error {
+				return source.ValidatePublicURL(request.Context(), request.URL.String())
+			},
+		},
 		extractor: extractor,
 		saveCase:  saveCase,
 		notifier:  notifier,
@@ -663,7 +668,7 @@ func (t TelegramNotifier) Notify(ctx context.Context, event Event, engineeringCa
 	endpoint := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", t.Token)
 	message := fmt.Sprintf("🏛️ Nuevo caso: %s\nVeredicto: %s (%d/100)\n%s",
 		engineeringCase.Title, engineeringCase.HypeFilter.Verdict, engineeringCase.HypeFilter.Score, event.URL)
-	payload, _ := json.Marshal(map[string]string{"chat_id": t.ChatID, "text": message, "disable_web_page_preview": "false"})
+	payload, _ := json.Marshal(map[string]any{"chat_id": t.ChatID, "text": message, "disable_web_page_preview": false})
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(payload))
 	if err != nil {
 		return err
