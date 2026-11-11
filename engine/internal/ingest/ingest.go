@@ -295,7 +295,18 @@ func (s *Service) processItem(ctx context.Context, sourceItem Source, item Item)
 	s.saveSeenLocked()
 	s.mu.Unlock()
 
-	if !matchesKeywords(sourceItem, item) {
+	content := item.Content
+	title := item.Title
+	if len(content) < 1200 && strings.HasPrefix(item.URL, "http") {
+		if document, err := source.FromURL(ctx, item.URL, nil); err == nil && len(document.Text) > len(content) {
+			content = document.Text
+			if strings.TrimSpace(document.Title) != "" {
+				title = document.Title
+			}
+		}
+	}
+	enriched := Item{ID: item.ID, Title: title, URL: item.URL, Content: content, Published: item.Published}
+	if !matchesKeywords(sourceItem, enriched) {
 		event.Status = "skipped"
 		event.Message = "no coincide con las palabras clave"
 		s.appendEvent(event)
@@ -308,9 +319,9 @@ func (s *Service) processItem(ctx context.Context, sourceItem Source, item Item)
 		return event
 	}
 
-	document := source.FromText(item.Content, source.Options{
+	document := source.FromText(content, source.Options{
 		URL:         item.URL,
-		Title:       item.Title,
+		Title:       title,
 		Type:        "other",
 		RetrievedAt: item.Published,
 	})

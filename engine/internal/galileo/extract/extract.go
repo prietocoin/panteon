@@ -174,29 +174,34 @@ func parseHeading(raw string) (kind, inline string) {
 	if kind == "" {
 		return "", ""
 	}
-	if inline == "" && !strings.HasPrefix(strings.TrimSpace(raw), "#") && len(key) > 24 {
-		return "", ""
-	}
 	return kind, inline
 }
 
 func classifyHeading(key string) string {
-	key = strings.TrimSuffix(strings.TrimSpace(key), ":")
+	key = strings.TrimSpace(key)
+	key = strings.TrimRight(key, "?:!.")
 	key = strings.Trim(key, " ._-")
 
 	switch key {
-	case "symptom", "symptoms", "sintoma", "sintomas", "senal", "senales":
+	case "symptom", "symptoms", "sintoma", "sintomas", "senal", "senales",
+		"what happened", "impact", "customer impact", "how did the outage impact customers",
+		"incident summary", "summary", "overview", "the incident", "what was the impact":
 		return "symptom"
-	case "cause", "root cause", "causa", "causa raiz", "root-cause":
+	case "cause", "root cause", "causa", "causa raiz", "root-cause",
+		"how did the incident occur", "why did it happen", "what caused", "what caused it",
+		"technical analysis", "analysis", "postmortem analysis", "why it happened":
 		return "cause"
 	case "solution", "solutions", "solucion", "soluciones", "fix", "fixes",
-		"remediation", "resolution", "resolucion", "actions", "acciones":
+		"remediation", "remediation and follow-up steps", "resolution", "resolucion",
+		"mitigation", "what we did", "actions", "acciones", "action items",
+		"corrective actions", "follow-up", "follow-up steps":
 		return "solution"
-	case "tradeoff", "tradeoffs", "trade-off", "trade-offs", "compensacion",
+	case "tradeoff", "tradeoffs", "trade-off", "trade-offs", "trade offs", "compensacion",
 		"compensaciones", "cost", "costs", "coste", "costes", "riesgo", "riesgos", "risks":
 		return "tradeoffs"
 	case "verification", "verificacion", "validation", "validacion",
-		"como se verifico", "how we verified", "evidence of fix":
+		"como se verifico", "how we verified", "evidence of fix",
+		"monitoring", "results", "result":
 		return "verification"
 	case "title", "titulo":
 		return "title"
