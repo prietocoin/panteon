@@ -882,11 +882,16 @@ function paintJob(job) {
         ${job.status === 'done' ? `
           <div class="grid-2" style="margin-top:18px">
             <div class="card success"><h3>Render completo</h3><p>${esc(fmtDate(job.finished_at))}</p><p class="hint">${job.percent}% · ${job.total_clips || 0} clips</p></div>
-            <div class="card neutral"><h3>Salidas</h3><div class="actions">${others.map((item) => `<a class="btn btn-sm" href="${fileURL(item.path)}" target="_blank" rel="noopener">${esc(item.kind)}</a>`).join('')}</div></div>
+            <div class="card neutral"><h3>Salidas</h3><div class="actions">
+              ${video ? `<a class="btn btn-sm" href="${fileURL(video.path)}" download>Descargar vídeo</a>` : ''}
+              ${audio ? `<a class="btn btn-sm" href="${fileURL(audio.path)}" download>Descargar audio</a>` : ''}
+              ${others.map((item) => `<a class="btn btn-sm" href="${fileURL(item.path)}" target="_blank" rel="noopener">${esc(item.kind)}</a>`).join('')}
+            </div></div>
           </div>
           ${video ? (video.path.endsWith('.gif')
             ? `<img src="${fileURL(video.path)}" alt="render" style="max-width:100%;margin-top:16px;border:1px solid var(--line);border-radius:8px">`
-            : `<video controls src="${fileURL(video.path)}" style="margin-top:16px"></video>`) : ''}
+            : `<video controls autoplay muted playsinline src="${fileURL(video.path)}" style="margin-top:16px"></video>`) : ''}
+          ${video ? `<div class="hint" style="margin-top:8px">Si empieza negro, avanza 1–2 segundos: el título entra con fade-in.</div>` : ''}
           ${audio ? `<audio controls src="${fileURL(audio.path)}"></audio>` : ''}
         ` : ''}
       </div>
