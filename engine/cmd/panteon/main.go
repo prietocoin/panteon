@@ -369,10 +369,7 @@ func runServe(args []string) error {
 
 func displayAddr(addr string) string {
 	if strings.HasPrefix(addr, ":") {
-		return "127.0.0.1" + addr
-	}
-	if strings.HasPrefix(addr, "0.0.0.0:") {
-		return "127.0.0.1:" + strings.TrimPrefix(addr, "0.0.0.0:")
+		return "0.0.0.0" + addr
 	}
 	return addr
 }
