@@ -55,7 +55,9 @@ func New(workspace string) (*Server, error) {
 			return nil, err
 		}
 	}
-	server.seed()
+	if strings.ToLower(strings.TrimSpace(os.Getenv("PANTEON_SEED"))) != "false" {
+		server.seed()
+	}
 	return server, nil
 }
 

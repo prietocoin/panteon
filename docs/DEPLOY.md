@@ -75,7 +75,11 @@ Configura en `panteon`:
 
 ```text
 PANTEON_TTS_URL=http://<nombre-interno-del-servicio>:8000
+PANTEON_SEED=false
 ```
+
+`PANTEON_SEED=false` evita que el contenedor cree un caso demo al arrancar. Cámbialo
+a `true` si quieres un caso de ejemplo en el primer despliegue.
 
 ## GPU
 
