@@ -9,3 +9,4 @@ services/pavarotti/voices/*.wav
 services/pavarotti/voices/*.mp3
 services/pavarotti/voices/*.flac
 !services/pavarotti/voices/.gitkeep
+*.exe~

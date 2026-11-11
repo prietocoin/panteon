@@ -112,6 +112,9 @@ Abre `http://127.0.0.1:8080`. Incluye dashboard, alta de casos desde URL/texto,
 revisión Anti-Hype, dossier/guion/runs, lanzador de renders y progreso en vivo por SSE.
 La UI va embebida en el binario: no requiere Node ni un servidor aparte.
 
+Los casos también se pueden crear por API (`POST /api/cases`) y el dashboard los
+detecta automáticamente con un aviso. Todavía no hay watcher de RSS/GitHub/email.
+
 ## FFmpeg portable
 
 `scripts/install-ffmpeg.ps1` descarga FFmpeg dentro de `tools/ffmpeg` sin tocar el

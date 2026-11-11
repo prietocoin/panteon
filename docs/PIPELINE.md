@@ -169,6 +169,23 @@ Esto produce 36 clips atómicos de 20 s = **12 minutos**, 43.200 frames a 1080p6
 Si el equipo duerme de todos modos, el timeout de 24 h evita que el proceso muera y
 la caché permite reanudar.
 
+## Ingesta de casos
+
+Hoy un caso entra de dos formas:
+
+1. **UI**: `Nuevo caso` → URL o texto → Galileo.
+2. **API**:
+
+```bash
+curl -X POST http://localhost:8080/api/cases \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://ejemplo.com/postmortem"}'
+```
+
+El dashboard se refresca cada 8 segundos y muestra un aviso cuando aparece un caso
+nuevo o termina un render. No hay todavía un watcher automático de RSS, GitHub,
+correo o webhooks; eso sería el siguiente módulo de ingesta.
+
 ## UI embebida
 
 ```powershell

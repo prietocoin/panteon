@@ -4,6 +4,8 @@ const state = {
   caseDetail: null,
   currentJob: null,
   eventSource: null,
+  caseIDs: null,
+  jobStatus: {},
 };
 
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -157,6 +159,27 @@ async function dashboard() {
   ]);
   paintHealth(summary);
   state.jobs = jobs;
+
+  const previousCases = state.caseIDs;
+  const previousJobs = state.jobStatus || {};
+  if (previousCases) {
+    const fresh = cases.filter((item) => !previousCases.has(item.id));
+    if (fresh.length) {
+      toast(`Nuevo caso: ${fresh[0].title}`, 'ok');
+    }
+  }
+  for (const job of jobs) {
+    const previous = previousJobs[job.id];
+    if (!previous) continue;
+    if (previous !== 'done' && job.status === 'done') {
+      toast(`Render completo: ${job.title}`, 'ok');
+    }
+    if (previous !== 'failed' && job.status === 'failed') {
+      toast(`Render falló: ${job.title}`, 'error');
+    }
+  }
+  state.caseIDs = new Set(cases.map((item) => item.id));
+  state.jobStatus = Object.fromEntries(jobs.map((job) => [job.id, job.status]));
 
   const completed = cases.reduce((total, item) => total + (item.runs || 0), 0);
   const stats = `
@@ -716,8 +739,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (!location.hash) location.hash = '#/dashboard';
   else route();
 });
-setInterval(() => {
-  if (location.hash.startsWith('#/dashboard') || location.hash.startsWith('#/jobs')) {
-    refreshSummary();
+setInterval(async () => {
+  if (document.hidden) return;
+  try {
+    if (location.hash.startsWith('#/dashboard')) {
+      await dashboard();
+    } else if (location.hash.startsWith('#/jobs')) {
+      await jobsView();
+    } else {
+      await refreshSummary();
+    }
+  } catch (error) {
+    console.error(error);
   }
 }, 8000);

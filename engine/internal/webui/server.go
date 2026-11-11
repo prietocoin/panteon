@@ -729,7 +729,11 @@ func (s *Server) seed() {
 	fixture := filepath.Join("engine", "internal", "galileo", "testdata", "postmortem.md")
 	document, err := source.FromFile(fixture, source.Options{})
 	if err != nil {
-		return
+		body, readErr := staticFiles.ReadFile("seed/postmortem.md")
+		if readErr != nil {
+			return
+		}
+		document = source.FromText(string(body), source.Options{Type: "postmortem"})
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()

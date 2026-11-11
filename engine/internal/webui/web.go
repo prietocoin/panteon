@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-//go:embed static/*
+//go:embed static/* seed/*
 var staticFiles embed.FS
 
 func staticHandler() http.Handler {
