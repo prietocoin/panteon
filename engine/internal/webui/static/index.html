@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Panteón</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <a class="brand" href="#/dashboard">
+        <span class="brand-mark">Π</span>
+        <span>
+          <strong>EL PANTEÓN</strong>
+          <small>sin hype · con evidencia</small>
+        </span>
+      </a>
+      <nav class="nav">
+        <a href="#/dashboard" data-nav="dashboard">Dashboard</a>
+        <a href="#/new" data-nav="new">Nuevo caso</a>
+        <a href="#/jobs" data-nav="jobs">Jobs</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="health-line"><span class="dot" id="dot-ffmpeg"></span><span>FFmpeg</span><span class="health-value" id="health-ffmpeg">—</span></div>
+        <div class="health-line"><span class="dot" id="dot-chrome"></span><span>Chromium</span><span class="health-value" id="health-chrome">—</span></div>
+        <div class="health-line"><span class="dot dot-neutral"></span><span>Workspace</span><span class="health-value" id="health-workspace">—</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="page-title" id="page-title">Dashboard</div>
+          <div class="page-subtitle" id="page-subtitle">Casos, revisión y renders</div>
+        </div>
+        <div class="chips" id="chips"></div>
+      </header>
+      <div class="content" id="app"></div>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>

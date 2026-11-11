@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://el-panteon.local/contracts/run_manifest.schema.json",
+  "title": "RunManifest",
+  "description": "Resumen de una ejecución completa del pipeline de El Panteón.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "case_id",
+    "title",
+    "started_at",
+    "finished_at",
+    "fps",
+    "width",
+    "height",
+    "frame_count",
+    "rigor",
+    "clips",
+    "outputs"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0"},
+    "case_id": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "started_at": {"type": "string", "format": "date-time"},
+    "finished_at": {"type": "string", "format": "date-time"},
+    "fps": {"type": "integer", "minimum": 1},
+    "width": {"type": "integer", "minimum": 1},
+    "height": {"type": "integer", "minimum": 1},
+    "frame_count": {"type": "integer", "minimum": 0},
+    "rigor": {"$ref": "#/definitions/rigor"},
+    "clips": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/clip"}
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/output"}
+    }
+  },
+  "definitions": {
+    "rigor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passed", "score", "findings"],
+      "properties": {
+        "passed": {"type": "boolean"},
+        "score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "findings": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/finding"}
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule", "message"],
+      "properties": {
+        "rule": {"type": "string", "minLength": 1},
+        "message": {"type": "string", "minLength": 1}
+      }
+    },
+    "clip": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "narration", "duration_sec", "frames", "cache_key", "reused"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "narration": {"type": "string", "minLength": 1},
+        "duration_sec": {"type": "number", "exclusiveMinimum": 0},
+        "frames": {"type": "integer", "minimum": 1},
+        "html": {"type": "string"},
+        "audio": {"type": "string"},
+        "cache_key": {"type": "string", "minLength": 1},
+        "reused": {"type": "boolean"}
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path"],
+      "properties": {
+        "kind": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0",
+  "case_id": "sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025",
+  "title": "Incident: connection pool exhaustion",
+  "scenes": [
+    {
+      "id": "scene-01",
+      "title": "El caso",
+      "clips": [
+        {
+          "id": "clip-01",
+          "narration": "Caso de ingeniería: Incident: connection pool exhaustion.",
+          "duration_sec": 2.5,
+          "visual": {
+            "kind": "title",
+            "title": "Incident: connection pool exhaustion",
+            "subtitle": "El Panteón · Caso de ingeniería"
+          },
+          "sfx": [
+            "whoosh"
+          ]
+        },
+        {
+          "id": "clip-02",
+          "narration": "La API de pagos devolvió errores 503 durante 12 minutos.",
+          "duration_sec": 2.5,
+          "visual": {
+            "kind": "cards",
+            "title": "El síntoma",
+            "cards": [
+              {
+                "title": "Síntoma",
+                "body": "La API de pagos devolvió errores 503 durante 12 minutos. La latencia p99 subió de 180 ms a 4200 ms.",
+                "tone": "danger"
+              },
+              {
+                "title": "Evidencia",
+                "body": "La API de pagos devolvió errores 503 durante 12 minutos. La latencia p99 subió de 180 ms a 4200 ms.",
+                "tone": "warning"
+              }
+            ]
+          },
+          "sfx": [
+            "impact"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scene-02",
+      "title": "La causa",
+      "clips": [
+        {
+          "id": "clip-03",
+          "narration": "La causa raíz.",
+          "duration_sec": 2.5,
+          "visual": {
+            "kind": "title",
+            "title": "La causa raíz",
+            "subtitle": "Del síntoma al mecanismo"
+          },
+          "sfx": [
+            "whoosh"
+          ]
+        },
+        {
+          "id": "clip-04",
+          "narration": "El pool de conexiones se agotó porque una migración abrió transacciones sin liberar conexiones.",
+          "duration_sec": 2.5,
+          "visual": {
+            "kind": "bullets",
+            "title": "Qué falló",
+            "bullets": [
+              "El pool de conexiones se agotó porque una migración abrió transacciones sin liberar conexiones."
+            ]
+          },
+          "sfx": [
+            "impact"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scene-03",
+      "title": "La solución",
+      "clips": [
+        {
+          "id": "clip-05",
+          "narration": "La solución aplicada.",
+          "duration_sec": 2.5,
+          "visual": {
+            "kind": "title",
+            "title": "La solución",
+            "subtitle": "Se añadió un límite de conexiones por instancia y un circuit breaker."
+          },
+          "sfx": [
+            "whoosh"
+          ]
+        },
+        {
+          "id": "clip-06",
+          "narration": "Se aplicaron 2 acciones: Limitar el pool a 20 conexiones por instancia.; Abrir el circuit breaker tras 5 timeouts..",
+          "duration_sec": 2.5,
+          "visual": {
+            "kind": "cards",
+            "title": "Plan de remediación",
+            "cards": [
+              {
+                "title": "Acción 1",
+                "body": "Limitar el pool a 20 conexiones por instancia.",
+                "tone": "success"
+              },
+              {
+                "title": "Acción 2",
+                "body": "Abrir el circuit breaker tras 5 timeouts.",
+                "tone": "success"
+              }
+            ]
+          },
+          "sfx": [
+            "impact"
+          ]
+        },
+        {
+          "id": "clip-07",
+          "narration": "Los cambios concretos.",
+          "duration_sec": 2.5,
+          "visual": {
+            "kind": "code",
+            "title": "Cambios aplicados",
+            "code": "# Plan de remediación\ncase: sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025\nremediation:\n  - Limitar el pool a 20 conexiones por instancia.\n  - Abrir el circuit breaker tras 5 timeouts.\nverification: La latencia p99 volvió a 180 ms durante 72 horas y los errores 503 desaparecieron.",
+            "code_language": "yaml"
+          },
+          "sfx": [
+            "typing"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scene-04",
+      "title": "La verificación",
+      "clips": [
+        {
+          "id": "clip-08",
+          "narration": "La latencia p99 volvió a 180 ms durante 72 horas y los errores 503 desaparecieron.",
+          "duration_sec": 2.5,
+          "visual": {
+            "kind": "bullets",
+            "title": "Cómo se verificó",
+            "bullets": [
+              "La latencia p99 volvió a 180 ms durante 72 horas y los errores 503 desaparecieron.",
+              "Trade-off: Menor throughput pico durante ráfagas."
+            ]
+          },
+          "sfx": [
+            "impact"
+          ]
+        },
+        {
+          "id": "clip-09",
+          "narration": "Fin del caso. Sin hype, con evidencia.",
+          "duration_sec": 2.5,
+          "visual": {
+            "kind": "title",
+            "title": "Fin del caso",
+            "subtitle": "El Panteón · Sin Hype"
+          },
+          "sfx": [
+            "whoosh"
+          ]
+        }
+      ]
+    }
+  ],
+  "generated_at": "2026-11-10T00:30:53.7631832Z"
+}

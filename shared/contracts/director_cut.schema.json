@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://el-panteon.local/contracts/director_cut.schema.json",
+  "title": "DirectorCut",
+  "description": "Guion audiovisual producido por Cervantes y consumido por Da Vinci y Pixar.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "case_id", "title", "scenes", "generated_at"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0"},
+    "case_id": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/scene"}
+    },
+    "generated_at": {"type": "string", "format": "date-time"}
+  },
+  "definitions": {
+    "scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "clips"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "clips": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/definitions/clip"}
+        }
+      }
+    },
+    "clip": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "narration", "duration_sec", "visual"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "narration": {"type": "string", "minLength": 1},
+        "duration_sec": {"type": "number", "exclusiveMinimum": 0},
+        "visual": {"$ref": "#/definitions/visual"},
+        "sfx": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "visual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "title"],
+      "properties": {
+        "kind": {"type": "string", "enum": ["title", "cards", "bullets", "code"]},
+        "title": {"type": "string", "minLength": 1},
+        "subtitle": {"type": "string"},
+        "bullets": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "cards": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/card"}
+        },
+        "code": {"type": "string"},
+        "code_language": {"type": "string"}
+      }
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "body", "tone"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "body": {"type": "string", "minLength": 1},
+        "tone": {"type": "string", "enum": ["danger", "success", "warning", "neutral"]}
+      }
+    }
+  }
+}

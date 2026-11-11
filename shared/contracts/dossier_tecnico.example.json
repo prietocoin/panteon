@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "case_id": "sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025",
+  "title": "Incident: connection pool exhaustion",
+  "summary": "Síntoma: La API de pagos devolvió errores 503 durante 12 minutos. La latencia p99 subió de 180 ms a 4200 ms. Causa: El pool de conexiones se agotó porque una migración abrió transacciones sin liberar conexiones. Solución: Se añadió un límite de conexiones por instancia y un circuit breaker.",
+  "facts": [
+    {
+      "label": "Síntoma",
+      "value": "La API de pagos devolvió errores 503 durante 12 minutos. La latencia p99 subió de 180 ms a 4200 ms.",
+      "source": "line:5"
+    },
+    {
+      "label": "Causa",
+      "value": "El pool de conexiones se agotó porque una migración abrió transacciones sin liberar conexiones.",
+      "source": "line:10"
+    },
+    {
+      "label": "Solución",
+      "value": "Se añadió un límite de conexiones por instancia y un circuit breaker.",
+      "source": "line:14"
+    },
+    {
+      "label": "Verificación",
+      "value": "La latencia p99 volvió a 180 ms durante 72 horas y los errores 503 desaparecieron.",
+      "source": "sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025"
+    },
+    {
+      "label": "Trade-offs",
+      "value": "Menor throughput pico durante ráfagas.",
+      "source": "sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "symptom-evidence",
+      "kind": "benchmark",
+      "title": "Evidencia del síntoma",
+      "content": "La API de pagos devolvió errores 503 durante 12 minutos.\nLa latencia p99 subió de 180 ms a 4200 ms.",
+      "source": "sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025"
+    },
+    {
+      "id": "cause-mechanism",
+      "kind": "diagram",
+      "title": "Cadena causal",
+      "content": "El pool de conexiones se agotó porque una migración abrió transacciones sin liberar conexiones.",
+      "source": "sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025"
+    },
+    {
+      "id": "solution-code",
+      "kind": "code",
+      "title": "Plan de remediación",
+      "content": "# Plan de remediación\ncase: sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025\nremediation:\n  - Limitar el pool a 20 conexiones por instancia.\n  - Abrir el circuit breaker tras 5 timeouts.\nverification: La latencia p99 volvió a 180 ms durante 72 horas y los errores 503 desaparecieron.",
+      "source": "sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025"
+    },
+    {
+      "id": "verification",
+      "kind": "reference",
+      "title": "Verificación y compensaciones",
+      "content": "La latencia p99 volvió a 180 ms durante 72 horas y los errores 503 desaparecieron.\n\nTrade-offs: Menor throughput pico durante ráfagas.",
+      "source": "sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025"
+    }
+  ],
+  "generated_at": "2026-11-10T00:30:53.7610594Z"
+}

@@ -1,0 +1,16 @@
+.git
+.gitignore
+out
+tools
+benchmarks
+*.exe
+*.test
+.env
+*.pdf
+Apendice_Arquitectonico_El_Panteon.pdf
+apendice_panteon.html
+apendice_panteon.py
+render_panteon.ps1
+services/pavarotti/voices/*.wav
+services/pavarotti/voices/*.mp3
+services/pavarotti/voices/*.flac

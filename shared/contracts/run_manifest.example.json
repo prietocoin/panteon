@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "case_id": "sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025",
+  "title": "Incident: connection pool exhaustion",
+  "started_at": "2026-11-10T00:30:53.7610594Z",
+  "finished_at": "2026-11-10T00:33:31.1318164Z",
+  "fps": 12,
+  "width": 640,
+  "height": 360,
+  "frame_count": 270,
+  "rigor": {
+    "passed": true,
+    "score": 100,
+    "findings": []
+  },
+  "clips": [
+    {
+      "id": "clip-01",
+      "narration": "Caso de ingeniería: Incident: connection pool exhaustion.",
+      "duration_sec": 2.5,
+      "frames": 30,
+      "html": "out\\demo\\run\\html\\clip-01.html",
+      "audio": "out\\demo\\run\\audio\\clip-01.wav",
+      "cache_key": "sha256:78541e5e5f251d24a7bc66507f3d1441c38c30f259ce90767e171573b6f49043",
+      "reused": false
+    },
+    {
+      "id": "clip-02",
+      "narration": "La API de pagos devolvió errores 503 durante 12 minutos.",
+      "duration_sec": 2.5,
+      "frames": 30,
+      "html": "out\\demo\\run\\html\\clip-02.html",
+      "audio": "out\\demo\\run\\audio\\clip-02.wav",
+      "cache_key": "sha256:7fc5803a9be83243a915d7d9b3eee1acf748645b98345424ae917841d7b3647d",
+      "reused": false
+    },
+    {
+      "id": "clip-03",
+      "narration": "La causa raíz.",
+      "duration_sec": 2.5,
+      "frames": 30,
+      "html": "out\\demo\\run\\html\\clip-03.html",
+      "audio": "out\\demo\\run\\audio\\clip-03.wav",
+      "cache_key": "sha256:bd0c39edfb9a5031dd558174b911fffd316b041e0f1296e50c4bf75607d8e169",
+      "reused": false
+    },
+    {
+      "id": "clip-04",
+      "narration": "El pool de conexiones se agotó porque una migración abrió transacciones sin liberar conexiones.",
+      "duration_sec": 2.5,
+      "frames": 30,
+      "html": "out\\demo\\run\\html\\clip-04.html",
+      "audio": "out\\demo\\run\\audio\\clip-04.wav",
+      "cache_key": "sha256:81c8bb5b0de13b0163ed8e80a28eba1e880442ef9fd05754b9c720d3b975567c",
+      "reused": false
+    },
+    {
+      "id": "clip-05",
+      "narration": "La solución aplicada.",
+      "duration_sec": 2.5,
+      "frames": 30,
+      "html": "out\\demo\\run\\html\\clip-05.html",
+      "audio": "out\\demo\\run\\audio\\clip-05.wav",
+      "cache_key": "sha256:8e82d89878cfa293d5c79738a2629714dfddcca3ba1664459821c708e6ce05e2",
+      "reused": false
+    },
+    {
+      "id": "clip-06",
+      "narration": "Se aplicaron 2 acciones: Limitar el pool a 20 conexiones por instancia.; Abrir el circuit breaker tras 5 timeouts..",
+      "duration_sec": 2.5,
+      "frames": 30,
+      "html": "out\\demo\\run\\html\\clip-06.html",
+      "audio": "out\\demo\\run\\audio\\clip-06.wav",
+      "cache_key": "sha256:6ff2e3262750a0d635e70741dc8ab738adcd105cb4a043b903b48acb82c5b1c2",
+      "reused": false
+    },
+    {
+      "id": "clip-07",
+      "narration": "Los cambios concretos.",
+      "duration_sec": 2.5,
+      "frames": 30,
+      "html": "out\\demo\\run\\html\\clip-07.html",
+      "audio": "out\\demo\\run\\audio\\clip-07.wav",
+      "cache_key": "sha256:481aadb7427123c937a6298b9447fa954deea6eed7d291d950773917a5ec8943",
+      "reused": false
+    },
+    {
+      "id": "clip-08",
+      "narration": "La latencia p99 volvió a 180 ms durante 72 horas y los errores 503 desaparecieron.",
+      "duration_sec": 2.5,
+      "frames": 30,
+      "html": "out\\demo\\run\\html\\clip-08.html",
+      "audio": "out\\demo\\run\\audio\\clip-08.wav",
+      "cache_key": "sha256:5a7914ed027fe8f569bb0a12352649eff3fa2519b169ffce1b40ac70e8e05464",
+      "reused": false
+    },
+    {
+      "id": "clip-09",
+      "narration": "Fin del caso. Sin hype, con evidencia.",
+      "duration_sec": 2.5,
+      "frames": 30,
+      "html": "out\\demo\\run\\html\\clip-09.html",
+      "audio": "out\\demo\\run\\audio\\clip-09.wav",
+      "cache_key": "sha256:476448f8dbaf99589e270c709877b88b97181c2c6a1014cb6d216fa08fe183ed",
+      "reused": false
+    }
+  ],
+  "outputs": [
+    {
+      "kind": "dossier",
+      "path": "out\\demo\\run\\dossier_tecnico.json"
+    },
+    {
+      "kind": "director_cut",
+      "path": "out\\demo\\run\\director_cut.json"
+    },
+    {
+      "kind": "audio",
+      "path": "out\\demo\\run\\audio\\master.wav"
+    },
+    {
+      "kind": "video",
+      "path": "out\\demo\\run\\master.gif"
+    }
+  ]
+}

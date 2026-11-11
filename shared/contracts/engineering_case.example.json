@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "id": "sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025",
+  "title": "Incident: connection pool exhaustion",
+  "source": {
+    "type": "postmortem",
+    "title": "Incident: connection pool exhaustion",
+    "retrieved_at": "2026-11-10T00:17:05.8691737Z",
+    "content_hash": "sha256:b8b843c42af15a7dcb4e0b189923a291b9001cf9ecdac4862b4ad2c4b18b3025"
+  },
+  "symptom": {
+    "summary": "La API de pagos devolvió errores 503 durante 12 minutos. La latencia p99 subió de 180 ms a 4200 ms.",
+    "observable": true,
+    "evidence": [
+      {
+        "quote": "La API de pagos devolvió errores 503 durante 12 minutos.",
+        "locator": "line:5"
+      },
+      {
+        "quote": "La latencia p99 subió de 180 ms a 4200 ms.",
+        "locator": "line:6"
+      }
+    ]
+  },
+  "cause": {
+    "summary": "El pool de conexiones se agotó porque una migración abrió transacciones sin liberar conexiones.",
+    "mechanism": "El pool de conexiones se agotó porque una migración abrió transacciones sin liberar conexiones.",
+    "observable": false,
+    "evidence": [
+      {
+        "quote": "El pool de conexiones se agotó porque una migración abrió transacciones sin liberar conexiones.",
+        "locator": "line:10"
+      }
+    ]
+  },
+  "solution": {
+    "summary": "Se añadió un límite de conexiones por instancia y un circuit breaker.",
+    "actions": [
+      {
+        "description": "Limitar el pool a 20 conexiones por instancia."
+      },
+      {
+        "description": "Abrir el circuit breaker tras 5 timeouts."
+      }
+    ],
+    "tradeoffs": [
+      "Menor throughput pico durante ráfagas."
+    ],
+    "verification": "La latencia p99 volvió a 180 ms durante 72 horas y los errores 503 desaparecieron.",
+    "evidence": [
+      {
+        "quote": "Se añadió un límite de conexiones por instancia y un circuit breaker.",
+        "locator": "line:14"
+      },
+      {
+        "quote": "- Limitar el pool a 20 conexiones por instancia.",
+        "locator": "line:16"
+      },
+      {
+        "quote": "- Abrir el circuit breaker tras 5 timeouts.",
+        "locator": "line:17"
+      }
+    ]
+  },
+  "hype_filter": {
+    "score": 100,
+    "verdict": "accept",
+    "flags": []
+  },
+  "generated_at": "2026-11-10T00:17:05.8691737Z"
+}

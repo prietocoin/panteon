@@ -1,0 +1,7 @@
+.git
+__pycache__
+*.pyc
+.venv
+voices/*.wav
+voices/*.mp3
+voices/*.flac

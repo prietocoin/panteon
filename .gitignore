@@ -1,0 +1,11 @@
+out/
+tools/
+*.exe
+*.test
+.env
+__pycache__/
+*.pyc
+services/pavarotti/voices/*.wav
+services/pavarotti/voices/*.mp3
+services/pavarotti/voices/*.flac
+!services/pavarotti/voices/.gitkeep

@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://el-panteon.local/contracts/dossier_tecnico.schema.json",
+  "title": "DossierTecnico",
+  "description": "Material técnico verificado producido por Atlas y consumido por Cervantes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "case_id", "title", "summary", "facts", "artifacts", "generated_at"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0"},
+    "case_id": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "summary": {"type": "string", "minLength": 1},
+    "facts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/fact"}
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/artifact"}
+    },
+    "generated_at": {"type": "string", "format": "date-time"}
+  },
+  "definitions": {
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "value", "source"],
+      "properties": {
+        "label": {"type": "string", "minLength": 1},
+        "value": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "title", "content", "source"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "enum": ["code", "benchmark", "diagram", "reference"]},
+        "title": {"type": "string", "minLength": 1},
+        "content": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
