@@ -1,0 +1,11 @@
+[phases.setup]
+aptPkgs = ["ffmpeg", "ca-certificates"]
+
+[phases.install]
+cmds = ["go mod download"]
+
+[phases.build]
+cmds = ["CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o out ./engine/cmd/panteon"]
+
+[start]
+cmd = "sh -c './out serve --workspace /app/workspace --addr 0.0.0.0:${PORT:-8080}'"

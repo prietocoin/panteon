@@ -39,21 +39,43 @@ arranque de Pavarotti puede tardar varios minutos mientras descarga el modelo.
 
 ## Easypanel
 
-Puedes desplegar los dos servicios por separado:
+### Opción A (recomendada): Dockerfile
 
-1. **panteon**: build desde el `Dockerfile` raíz, puerto 8080, volumen `/workspace`.
-2. **chatterbox_tts**: build desde `services/pavarotti/Dockerfile`, puerto 8000
-   (y opcionalmente 7860 para la UI Gradio), volúmenes `/models` y `/voices`.
+En el servicio `panteon`:
+
+- Build: **Dockerfile**
+- Dockerfile path: `Dockerfile`
+- Puerto: `8080`
+- Volumen: `/workspace`
+
+Para `chatterbox_tts`:
+
+- Build: **Dockerfile**
+- Contexto: `services/pavarotti`
+- Dockerfile path: `services/pavarotti/Dockerfile`
+- Puertos: `8000` y opcionalmente `7860`
+- Volúmenes: `/models` y `/voices`
+
+### Opción B: Nixpacks
+
+El repo incluye `nixpacks.toml` con el comando correcto:
+
+```toml
+[phases.build]
+cmds = ["CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o out ./engine/cmd/panteon"]
+
+[start]
+cmd = "sh -c './out serve --workspace /app/workspace --addr 0.0.0.0:${PORT:-8080}'"
+```
+
+Si Easypanel sigue usando Nixpacks, asegúrate de que detecte ese archivo en la raíz
+del repo y vuelve a desplegar. Instala FFmpeg vía `aptPkgs`.
 
 Configura en `panteon`:
 
 ```text
 PANTEON_TTS_URL=http://<nombre-interno-del-servicio>:8000
 ```
-
-Si el servicio en Easypanel se llama `chatterbox_tts`, usa
-`http://chatterbox_tts:8000`. La URL también se puede cambiar por render en el
-formulario de la UI.
 
 ## GPU
 
