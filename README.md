@@ -97,9 +97,10 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Levanta `panteon` (UI/API en `:8080`) y `pavarotti` (Chatterbox TTS en `:8000`).
-El contenedor de Panteón recibe `PANTEON_TTS_URL=http://pavarotti:8000`.
-Detalles, Easypanel y GPU en [`docs/DEPLOY.md`](docs/DEPLOY.md).
+Levanta `panteon` (UI/API en `:8080`) y `pavarotti` (Chatterbox Multilingual TTS en
+`:8000`, con UI Gradio en `/ui` y alias en `:7860`). El contenedor de Panteón recibe
+`PANTEON_TTS_URL=http://pavarotti:8000`. Detalles, Easypanel y GPU en
+[`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## UI web
 

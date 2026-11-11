@@ -5,7 +5,11 @@ El repo contiene dos servicios:
 | Servicio | Puerto | Rol |
 |---|---:|---|
 | `panteon` | 8080 | Motor Go, API y UI embebida |
-| `pavarotti` | 8000 | Chatterbox TTS (FastAPI + PyTorch) |
+| `pavarotti` | 8000 / 7860 | Chatterbox Multilingual TTS (FastAPI + Gradio) |
+
+La UI Gradio de clonación de voz está en `http://localhost:8000/ui` y también en
+`http://localhost:7860/ui` gracias al alias de Compose. El API estable usado por el
+motor es `http://pavarotti:8000/synthesize`.
 
 ## Docker Compose
 
@@ -15,7 +19,8 @@ docker compose up --build
 ```
 
 - UI: `http://localhost:8080`
-- TTS: `http://localhost:8000/health`
+- TTS API: `http://localhost:8000/health`
+- TTS UI (Gradio): `http://localhost:8000/ui` o `http://localhost:7860/ui`
 - Workspace persistente: volumen `panteon_workspace`
 - Modelo Chatterbox: volumen `chatterbox_models`
 
@@ -37,8 +42,8 @@ arranque de Pavarotti puede tardar varios minutos mientras descarga el modelo.
 Puedes desplegar los dos servicios por separado:
 
 1. **panteon**: build desde el `Dockerfile` raíz, puerto 8080, volumen `/workspace`.
-2. **chatterbox_tts**: build desde `services/pavarotti/Dockerfile`, puerto 8000,
-   volúmenes `/models` y `/voices`.
+2. **chatterbox_tts**: build desde `services/pavarotti/Dockerfile`, puerto 8000
+   (y opcionalmente 7860 para la UI Gradio), volúmenes `/models` y `/voices`.
 
 Configura en `panteon`:
 

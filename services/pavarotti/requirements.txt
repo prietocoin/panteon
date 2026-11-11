@@ -1,4 +1,5 @@
-chatterbox-tts>=0.1.2
-fastapi>=0.115,<1
-uvicorn[standard]>=0.34,<1
-soundfile>=0.13,<1
+chatterbox-tts
+gradio
+fastapi
+uvicorn[standard]
+soundfile

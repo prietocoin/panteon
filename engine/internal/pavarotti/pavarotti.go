@@ -122,7 +122,7 @@ func (s HTTPSynth) Synthesize(ctx context.Context, request Request) ([]byte, err
 
 	client := s.Client
 	if client == nil {
-		client = &http.Client{Timeout: 90 * time.Second}
+		client = &http.Client{Timeout: 5 * time.Minute}
 	}
 	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(payload))
 	if err != nil {

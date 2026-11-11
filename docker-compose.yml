@@ -21,8 +21,10 @@ services:
         TORCH_INDEX_URL: ${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cpu}
     ports:
       - "8000:8000"
+      - "7860:8000"  # compatibilidad con la UI Gradio anterior
     environment:
       CHATTERBOX_DEVICE: ${CHATTERBOX_DEVICE:-cpu}
+      CHATTERBOX_LANGUAGE: ${CHATTERBOX_LANGUAGE:-es}
       TORCH_THREADS: ${TORCH_THREADS:-4}
       HF_HOME: /models
       VOICE_DIR: /voices
