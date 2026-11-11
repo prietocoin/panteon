@@ -239,6 +239,7 @@ var (
 	scriptStyleRe = regexp.MustCompile(`(?is)<script[^>]*>.*?</script>|<style[^>]*>.*?</style>|<noscript[^>]*>.*?</noscript>`)
 	titleTagRe    = regexp.MustCompile(`(?is)<title[^>]*>(.*?)</title>`)
 	breakTagRe    = regexp.MustCompile(`(?i)<br\s*/?>`)
+	listItemRe    = regexp.MustCompile(`(?i)<li[^>]*>`)
 	blockTagRe    = regexp.MustCompile(`(?i)</?(p|div|section|article|header|footer|h[1-6]|li|tr|table|ul|ol|blockquote|pre)[^>]*>`)
 	anyTagRe      = regexp.MustCompile(`(?s)<[^>]+>`)
 )
@@ -252,6 +253,7 @@ func HTMLToText(raw string) (string, string) {
 
 	text := scriptStyleRe.ReplaceAllString(raw, " ")
 	text = breakTagRe.ReplaceAllString(text, "\n")
+	text = listItemRe.ReplaceAllString(text, "\n- ")
 	text = blockTagRe.ReplaceAllString(text, "\n")
 	text = anyTagRe.ReplaceAllString(text, " ")
 	text = html.UnescapeString(text)
