@@ -142,6 +142,7 @@ async function route() {
   try {
     if (view === 'dashboard') return await dashboard();
     if (view === 'new') return renderNewCase();
+    if (view === 'sources') return await sourcesView();
     if (view === 'jobs') return await jobsView();
     if (view === 'case' && parts[1]) return await caseView(decodeURIComponent(parts[1]));
     if (view === 'job' && parts[1]) return await jobView(decodeURIComponent(parts[1]));
@@ -166,6 +167,10 @@ async function dashboard() {
     const fresh = cases.filter((item) => !previousCases.has(item.id));
     if (fresh.length) {
       toast(`Nuevo caso: ${fresh[0].title}`, 'ok');
+      if (navigator.setAppBadge) navigator.setAppBadge(fresh.length).catch(() => {});
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Nuevo caso en El Panteón', { body: fresh[0].title });
+      }
     }
   }
   for (const job of jobs) {
@@ -646,6 +651,155 @@ function wireRenderForm(id) {
   });
 }
 
+async function sourcesView() {
+  setPage('Fuentes', 'Watcher RSS + GitHub → Galileo automático');
+  const data = await api('/api/sources');
+  const sources = data.sources || [];
+  const events = data.events || [];
+  $('#app').innerHTML = `
+    <section class="panel">
+      <div class="panel-head"><div class="panel-title">Añadir fuente</div><button class="btn btn-sm" id="check-sources">Comprobar ahora</button></div>
+      <div class="panel-body">
+        <form id="source-form" class="form-grid">
+          <label>Tipo
+            <select name="type" id="source-type">
+              <option value="rss">RSS / Atom</option>
+              <option value="github">GitHub issues</option>
+            </select>
+          </label>
+          <label>Nombre <input name="name" placeholder="Blog de ingeniería"></label>
+          <label>Intervalo (min) <input name="interval_minutes" type="number" min="5" value="60"></label>
+          <div class="span-3" id="source-url-wrap">
+            <label>URL del feed <input name="url" placeholder="https://ejemplo.com/feed.xml"></label>
+          </div>
+          <div class="span-3" id="source-repo-wrap" hidden>
+            <label>Repositorio <input name="repo" placeholder="owner/name"></label>
+          </div>
+          <label class="span-2">Palabras clave (separadas por coma)
+            <input name="keywords" placeholder="postmortem, incident, root cause">
+          </label>
+          <label style="justify-content:end">
+            <span>Crear caso automáticamente</span>
+            <input name="auto_create" type="checkbox" checked style="width:auto">
+          </label>
+          <div class="span-3 actions">
+            <button class="btn btn-primary" type="submit">Guardar fuente</button>
+            <span class="hint">El watcher revisa las fuentes cada minuto y ejecuta Galileo cuando toca.</span>
+          </div>
+          <div class="span-3" id="source-error"></div>
+        </form>
+        <div class="note-box" style="margin-top:16px">
+          Avisos fuera de la app: configura <code>PANTEON_NOTIFY_WEBHOOK</code> (Discord/Slack)
+          o <code>PANTEON_TELEGRAM_TOKEN</code> + <code>PANTEON_TELEGRAM_CHAT_ID</code>.
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><div class="panel-title">Fuentes configuradas</div><span class="hint">${sources.length} fuente(s)</span></div>
+      <div class="panel-body tight">
+        ${sources.length ? sources.map(sourceRowHTML).join('') : emptyHTML('Sin fuentes', 'Añade un feed RSS o un repositorio de GitHub.')}
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><div class="panel-title">Eventos de ingesta</div><button class="btn btn-sm" id="refresh-events">Actualizar</button></div>
+      <div class="panel-body tight">
+        ${events.length ? events.map(eventRowHTML).join('') : emptyHTML('Sin eventos', 'Cuando el watcher procese una fuente aparecerá aquí.')}
+      </div>
+    </section>`;
+
+  const typeSelect = $('#source-type');
+  const syncType = () => {
+    $('#source-url-wrap').hidden = typeSelect.value !== 'rss';
+    $('#source-repo-wrap').hidden = typeSelect.value !== 'github';
+  };
+  typeSelect.addEventListener('change', syncType);
+  syncType();
+
+  $('#source-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const body = new FormData(form);
+    const keywords = String(body.get('keywords') || '').split(',').map((item) => item.trim()).filter(Boolean);
+    const payload = {
+      type: body.get('type'),
+      name: body.get('name'),
+      url: body.get('url'),
+      repo: body.get('repo'),
+      interval_minutes: Number(body.get('interval_minutes')),
+      auto_create: body.get('auto_create') === 'on',
+      enabled: true,
+      keywords,
+    };
+    const errorBox = $('#source-error');
+    errorBox.innerHTML = '';
+    const button = $('button[type="submit"]', form);
+    button.disabled = true;
+    try {
+      await api('/api/sources', { method: 'POST', body: JSON.stringify(payload) });
+      toast('Fuente añadida', 'ok');
+      await sourcesView();
+    } catch (error) {
+      errorBox.innerHTML = `<div class="error-box">${esc(error.message)}</div>`;
+      toast(error.message, 'error');
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  $('#check-sources').addEventListener('click', async () => {
+    try {
+      await api('/api/sources/check', { method: 'POST', body: '{}' });
+      toast('Comprobación iniciada; revisa los eventos en unos segundos', 'ok');
+    } catch (error) {
+      toast(error.message, 'error');
+    }
+  });
+  $('#refresh-events').addEventListener('click', sourcesView);
+
+  $$('[data-delete-source]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      if (!confirm('¿Eliminar esta fuente?')) return;
+      try {
+        await api(`/api/sources/${encodeURIComponent(button.dataset.deleteSource)}`, { method: 'DELETE' });
+        toast('Fuente eliminada', 'ok');
+        await sourcesView();
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    });
+  });
+}
+
+function sourceRowHTML(source) {
+  const target = source.type === 'github' ? source.repo : source.url;
+  return `
+    <div class="job-row">
+      <div class="job-main">
+        <div class="job-title">${esc(source.name)} ${badge(source.type)} ${source.enabled ? '' : badge('disabled')}</div>
+        <div class="job-meta">${esc(target)} · cada ${esc(source.interval_minutes)} min · auto ${source.auto_create ? 'ON' : 'OFF'} · ${esc(fmtDate(source.last_checked_at))}</div>
+        ${source.last_error ? `<div class="error-box" style="margin:8px 0 0">${esc(source.last_error)}</div>` : ''}
+      </div>
+      <div class="actions">
+        <button class="btn btn-sm btn-danger" data-delete-source="${esc(source.id)}">Eliminar</button>
+      </div>
+    </div>`;
+}
+
+function eventRowHTML(event) {
+  const link = event.case_id ? `#/case/${encodeURIComponent(event.case_id)}` : '';
+  return `
+    <div class="job-row">
+      <div class="job-main">
+        <div class="job-title">${event.url ? `<a href="${esc(event.url)}" target="_blank" rel="noopener">${esc(event.title)}</a>` : esc(event.title)}</div>
+        <div class="job-meta">${esc(event.source_name)} · ${esc(fmtDate(event.time))} ${event.message ? `· ${esc(event.message)}` : ''}</div>
+      </div>
+      <div>${badge(event.status)}</div>
+      ${link ? `<a class="btn btn-sm" href="${link}">Abrir caso</a>` : ''}
+    </div>`;
+}
+
 async function jobsView() {
   setPage('Jobs', 'Cola y progreso de renders');
   const jobs = await api('/api/jobs');
@@ -739,6 +893,32 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (!location.hash) location.hash = '#/dashboard';
   else route();
 });
+
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  const button = $('#install-app');
+  if (button) button.hidden = false;
+});
+const installButton = $('#install-app');
+if (installButton) {
+  installButton.addEventListener('click', async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt = null;
+    installButton.hidden = true;
+  });
+}
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  const button = $('#install-app');
+  if (button) button.hidden = true;
+}
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch((error) => console.error(error));
+}
+
 setInterval(async () => {
   if (document.hidden) return;
   try {

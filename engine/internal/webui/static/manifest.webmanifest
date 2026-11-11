@@ -1,0 +1,37 @@
+{
+  "name": "El Panteón",
+  "short_name": "Panteón",
+  "description": "Casos de ingeniería verificables: Galileo, revisión y render.",
+  "start_url": "/#/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#080f1e",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nuevo caso",
+      "url": "/#/new",
+      "icons": [{"src": "/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Fuentes",
+      "url": "/#/sources",
+      "icons": [{"src": "/icon-192.png", "sizes": "192x192"}]
+    }
+  ]
+}

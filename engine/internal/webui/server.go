@@ -22,6 +22,7 @@ import (
 	"elpanteon/engine/internal/galileo/extract"
 	"elpanteon/engine/internal/galileo/source"
 	"elpanteon/engine/internal/galileo/store"
+	"elpanteon/engine/internal/ingest"
 	"elpanteon/engine/internal/keepawake"
 	"elpanteon/engine/internal/pavarotti"
 	"elpanteon/engine/internal/pipeline"
@@ -35,6 +36,7 @@ type Server struct {
 	reviewsDir string
 	runsDir    string
 	jobs       *JobManager
+	ingest     *ingest.Service
 }
 
 // New prepara el workspace y siembra el caso demo si está vacío.
@@ -55,10 +57,27 @@ func New(workspace string) (*Server, error) {
 			return nil, err
 		}
 	}
+	service, err := ingest.New(
+		filepath.Join(absolute, "ingest"),
+		extract.MarkedExtractor{},
+		server.saveCase,
+		ingest.NotifyFromEnv(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	server.ingest = service
 	if strings.ToLower(strings.TrimSpace(os.Getenv("PANTEON_SEED"))) != "false" {
 		server.seed()
 	}
 	return server, nil
+}
+
+// Start arranca el watcher de fuentes.
+func (s *Server) Start(ctx context.Context) {
+	if s.ingest != nil {
+		s.ingest.Start(ctx)
+	}
 }
 
 // Handler devuelve el router HTTP completo.
@@ -75,7 +94,14 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /api/jobs", s.handleListJobs)
 	mux.HandleFunc("GET /api/jobs/{id}", s.handleGetJob)
 	mux.HandleFunc("GET /api/jobs/{id}/events", s.handleJobEvents)
+	mux.HandleFunc("GET /api/sources", s.handleSources)
+	mux.HandleFunc("POST /api/sources", s.handleAddSource)
+	mux.HandleFunc("DELETE /api/sources/{id}", s.handleDeleteSource)
+	mux.HandleFunc("POST /api/sources/check", s.handleCheckSources)
+	mux.HandleFunc("GET /api/ingest/events", s.handleIngestEvents)
 	mux.HandleFunc("GET /api/file", s.handleFile)
+	mux.Handle("GET /manifest.webmanifest", staticFile("manifest.webmanifest", "application/manifest+json"))
+	mux.Handle("GET /sw.js", staticFile("sw.js", "application/javascript"))
 	mux.HandleFunc("/api/", func(writer http.ResponseWriter, request *http.Request) {
 		writeError(writer, http.StatusNotFound, "endpoint no encontrado")
 	})
@@ -358,6 +384,78 @@ func (s *Server) handleJobEvents(writer http.ResponseWriter, request *http.Reque
 			return
 		}
 	}
+}
+
+type sourcePayload struct {
+	Type            string   `json:"type"`
+	Name            string   `json:"name"`
+	URL             string   `json:"url"`
+	Repo            string   `json:"repo"`
+	IntervalMinutes int      `json:"interval_minutes"`
+	AutoCreate      *bool    `json:"auto_create"`
+	Enabled         *bool    `json:"enabled"`
+	Keywords        []string `json:"keywords"`
+}
+
+func (s *Server) handleSources(writer http.ResponseWriter, _ *http.Request) {
+	sources := s.ingest.ListSources()
+	ingest.SortSources(sources)
+	writeJSON(writer, http.StatusOK, map[string]any{
+		"sources": sources,
+		"events":  s.ingest.Events(),
+	})
+}
+
+func (s *Server) handleAddSource(writer http.ResponseWriter, request *http.Request) {
+	var payload sourcePayload
+	if err := decodeJSON(request, &payload); err != nil {
+		writeError(writer, http.StatusBadRequest, err.Error())
+		return
+	}
+	enabled := true
+	if payload.Enabled != nil {
+		enabled = *payload.Enabled
+	}
+	autoCreate := true
+	if payload.AutoCreate != nil {
+		autoCreate = *payload.AutoCreate
+	}
+	sourceItem, err := s.ingest.AddSource(ingest.Source{
+		Type:            payload.Type,
+		Name:            payload.Name,
+		URL:             payload.URL,
+		Repo:            payload.Repo,
+		IntervalMinutes: payload.IntervalMinutes,
+		Enabled:         enabled,
+		AutoCreate:      autoCreate,
+		Keywords:        payload.Keywords,
+	})
+	if err != nil {
+		writeError(writer, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(writer, http.StatusCreated, sourceItem)
+}
+
+func (s *Server) handleDeleteSource(writer http.ResponseWriter, request *http.Request) {
+	if !s.ingest.DeleteSource(request.PathValue("id")) {
+		writeError(writer, http.StatusNotFound, "fuente no encontrada")
+		return
+	}
+	writer.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Server) handleCheckSources(writer http.ResponseWriter, _ *http.Request) {
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+		defer cancel()
+		_, _ = s.ingest.RunOnce(ctx, true)
+	}()
+	writeJSON(writer, http.StatusAccepted, map[string]string{"status": "started"})
+}
+
+func (s *Server) handleIngestEvents(writer http.ResponseWriter, _ *http.Request) {
+	writeJSON(writer, http.StatusOK, s.ingest.Events())
 }
 
 func (s *Server) handleFile(writer http.ResponseWriter, request *http.Request) {

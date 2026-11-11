@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>El Panteón · feed de prueba</title>
+    <link>https://github.com/prietocoin/panteon</link>
+    <description>Feed de prueba para la ingesta automática.</description>
+    <item>
+      <title>Incident: cache stampede</title>
+      <link>https://github.com/prietocoin/panteon</link>
+      <guid>panteon-test-feed-1</guid>
+      <pubDate>Mon, 09 Nov 2026 12:00:00 +0000</pubDate>
+      <description><![CDATA[
+        <h2>Symptom</h2>
+        <p>La API de catálogo devolvió errores 500 durante 8 minutos y la latencia p99 llegó a 3000 ms.</p>
+        <h2>Root cause</h2>
+        <p>Una cache key expiró para todos los usuarios al mismo tiempo y generó 5000 consultas por segundo a la base de datos.</p>
+        <h2>Solution</h2>
+        <p>Se añadió jitter al TTL y un single-flight por clave.</p>
+        <ul>
+          <li>Aplicar jitter aleatorio de 0 a 30 segundos al TTL.</li>
+          <li>Serializar la regeneración por clave.</li>
+        </ul>
+        <h2>Tradeoffs</h2>
+        <p>Algunas claves pueden vivir hasta 30 segundos más.</p>
+        <h2>Verification</h2>
+        <p>La latencia p99 volvió a 120 ms durante 24 horas y no hubo errores 500.</p>
+      ]]></description>
+    </item>
+  </channel>
+</rss>

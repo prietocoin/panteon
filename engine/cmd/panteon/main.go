@@ -346,6 +346,7 @@ func runServe(args []string) error {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
+	server.Start(ctx)
 
 	serverErrors := make(chan error, 1)
 	go func() {
