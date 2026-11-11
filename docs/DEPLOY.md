@@ -2,7 +2,7 @@
 
 El repo contiene dos formas de despliegue:
 
-1. **Un solo servicio** con `Dockerfile.allinone`: Go + Chatterbox en el mismo contenedor.
+1. **Un solo servicio** con `Dockerfile`: Go + Chatterbox en el mismo contenedor.
 2. **Dos servicios** con `docker-compose.yml`: Panteón y Pavarotti separados.
 
 ## Un solo servicio (recomendado para Easypanel)
@@ -11,7 +11,7 @@ En el servicio `panteon`:
 
 ```text
 Build:            Dockerfile
-Dockerfile path:  Dockerfile.allinone
+Dockerfile path:  Dockerfile
 Puerto:           8080
 Volúmenes:        /workspace, /models y /voices
 ```
@@ -62,6 +62,9 @@ docker compose -f docker-compose.allinone.yml up --build
 | `panteon` | 8080 | Motor Go, API y UI embebida |
 | `pavarotti` | 8000 / 7860 | Chatterbox Multilingual TTS (FastAPI + Gradio) |
 
+En este modo, `panteon` usa `Dockerfile.panteon` (solo Go) y `pavarotti` usa
+`services/pavarotti/Dockerfile`.
+
 La UI Gradio de clonación de voz está en `http://localhost:8000/ui` y también en
 `http://localhost:7860/ui` gracias al alias de Compose. El API estable usado por el
 motor es `http://pavarotti:8000/synthesize`.
@@ -92,49 +95,29 @@ arranque de Pavarotti puede tardar varios minutos mientras descarga el modelo.
    - Voz: `default` o el nombre de un `.wav` en `services/pavarotti/voices/`.
 4. Lanzar el render y seguir el progreso por SSE.
 
-## Easypanel
-
-### Opción A (recomendada): Dockerfile
+## Easypanel (all-in-one)
 
 En el servicio `panteon`:
 
 - Build: **Dockerfile**
 - Dockerfile path: `Dockerfile`
 - Puerto: `8080`
-- Volumen: `/workspace`
+- Volúmenes: `/workspace`, `/models` y `/voices`
 
-Para `chatterbox_tts`:
+No uses Nixpacks para esta configuración: su build automático de Go no incluye Python
+ni Chatterbox, por lo que el chip quedaría siempre en **TTS OFF**. El `Dockerfile`
+raíz sí incluye ambos procesos.
 
-- Build: **Dockerfile**
-- Contexto: `services/pavarotti`
-- Dockerfile path: `services/pavarotti/Dockerfile`
-- Puertos: `8000` y opcionalmente `7860`
-- Volúmenes: `/models` y `/voices`
+`PANTEON_SEED=false` ya viene definido en la imagen. Cámbialo a `true` si quieres un
+caso demo en el primer despliegue.
 
-### Opción B: Nixpacks
+Si prefieres el modo de dos servicios, el servicio `panteon` usa
+`Dockerfile.panteon` y el TTS se despliega aparte con `services/pavarotti/Dockerfile`.
+En ese caso configura:
 
-El repo incluye `nixpacks.toml` con el comando correcto:
-
-```toml
-[phases.build]
-cmds = ["CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o out ./engine/cmd/panteon"]
-
-[start]
-cmd = "sh -c './out serve --workspace /app/workspace --addr 0.0.0.0:${PORT:-8080}'"
-```
-
-Si Easypanel sigue usando Nixpacks, asegúrate de que detecte ese archivo en la raíz
-del repo y vuelve a desplegar. Instala FFmpeg vía `aptPkgs`.
-
-Configura en `panteon`:
-
-```text
+```env
 PANTEON_TTS_URL=http://<nombre-interno-del-servicio>:8000
-PANTEON_SEED=false
 ```
-
-`PANTEON_SEED=false` evita que el contenedor cree un caso demo al arrancar. Cámbialo
-a `true` si quieres un caso de ejemplo en el primer despliegue.
 
 ## Guionista LLM y voz
 

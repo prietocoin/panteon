@@ -2,7 +2,7 @@ services:
   panteon:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.panteon
     ports:
       - "8080:8080"
     environment:

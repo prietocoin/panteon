@@ -98,7 +98,7 @@ Un solo servicio (Go + Chatterbox dentro del mismo contenedor):
 docker compose -f docker-compose.allinone.yml up --build
 ```
 
-O en Easypanel: Dockerfile `Dockerfile.allinone`, puerto 8080, volúmenes
+O en Easypanel: Dockerfile `Dockerfile`, puerto 8080, volúmenes
 `/workspace`, `/models` y `/voices`. El TTS queda interno en `127.0.0.1:8000` y no
 necesitas un segundo servicio. Detalles en [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
