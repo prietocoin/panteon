@@ -88,7 +88,7 @@ func (c *ChromiumRenderer) Render(ctx context.Context, clip contract.Clip, page 
 		if err != nil {
 			return nil, err
 		}
-		frameURL := fmt.Sprintf("%s?frame=%d&total=%d", htmlURL, index, frames)
+		frameURL := fmt.Sprintf("%s?frame=%d&total=%d&duration=%.3f", htmlURL, index, frames, clip.DurationSec)
 		command := exec.CommandContext(
 			ctx,
 			browser,

@@ -112,6 +112,10 @@ Abre `http://127.0.0.1:8080`. Incluye dashboard, alta de casos desde URL/texto,
 revisión Anti-Hype, dossier/guion/runs, lanzador de renders y progreso en vivo por SSE.
 La UI va embebida en el binario: no requiere Node ni un servidor aparte.
 
+El formulario de render tiene **Guion por escenas**: la duración de cada bloque sale
+del texto y del TTS, no de un clip fijo. Para un vídeo de 12 min hace falta un guion
+completo; el modo escenas no rellena con repeticiones.
+
 Los casos también se pueden crear por API (`POST /api/cases`) y el dashboard los
 detecta automáticamente con un aviso.
 

@@ -17,13 +17,18 @@ type Options struct {
 	ClipSeconds float64
 	// Copies repite la secuencia completa para pruebas de carga o vídeos largos.
 	Copies int
-	Now    func() time.Time
+	// SceneMode genera escenas/bloques de duración variable según la narración.
+	SceneMode bool
+	Now       func() time.Time
 }
 
 // Write convierte un dossier técnico en un director_cut con escenas y clips atómicos.
 func Write(dossier contract.Dossier, opts Options) (contract.DirectorCut, error) {
 	if err := dossier.Validate(); err != nil {
 		return contract.DirectorCut{}, fmt.Errorf("cervantes: %w", err)
+	}
+	if opts.SceneMode {
+		return writeSceneCut(dossier, opts)
 	}
 
 	clipSeconds := opts.ClipSeconds

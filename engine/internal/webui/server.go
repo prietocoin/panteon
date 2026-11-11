@@ -307,6 +307,7 @@ type renderRequest struct {
 	Repo        string  `json:"repo"`
 	Ref         string  `json:"ref"`
 	Chrome      string  `json:"chrome"`
+	SceneMode   bool    `json:"scene_mode"`
 }
 
 func (s *Server) handleRender(writer http.ResponseWriter, request *http.Request) {
@@ -584,6 +585,7 @@ func (s *Server) buildConfig(payload renderRequest) (pipeline.Config, error) {
 		Height:      payload.Height,
 		Voice:       payload.Voice,
 		SynthName:   payload.TTS,
+		SceneMode:   payload.SceneMode,
 	}
 	if config.ClipSeconds == 0 {
 		config.ClipSeconds = 2.5

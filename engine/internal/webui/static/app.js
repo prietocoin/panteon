@@ -561,12 +561,17 @@ function renderFormHTML(data) {
   const ttsURL = summary.tts_url || 'http://localhost:8000';
   return `
     <div class="note-box">
-      Para un vídeo de 12 min a 1080p60 usa <strong>20 s por clip × 4 copias</strong>.
-      ${summary.ffmpeg ? 'FFmpeg está disponible: el cierre será MP4.' : 'Sin FFmpeg: el cierre será GIF + WAV.'}
+      En <strong>modo escenas</strong> la duración de cada bloque sale de la narración y del TTS:
+      puede ser 60 s, 115 s, 3 min o lo que pida el texto. No se fuerza un clip fijo.
+      Para 12 minutos hace falta un guion completo; el modo escenas respeta su duración real.
     </div>
     <form id="render-form" class="form-grid" style="margin-top:18px">
-      <label>Segundos por clip <input name="clip_seconds" type="number" min="0.25" max="30" step="0.25" value="2.5"></label>
-      <label>Copias de la secuencia <input name="clip_copies" type="number" min="1" max="100" value="1"></label>
+      <label class="span-3" style="flex-direction:row;align-items:center;gap:10px;text-transform:none;letter-spacing:normal">
+        <input name="scene_mode" type="checkbox" checked style="width:auto">
+        <span>Guion por escenas (duración variable según texto y TTS)</span>
+      </label>
+      <label id="clip-seconds-field">Segundos por clip <input name="clip_seconds" type="number" min="0.25" max="30" step="0.25" value="2.5"></label>
+      <label id="clip-copies-field">Copias de la secuencia <input name="clip_copies" type="number" min="1" max="100" value="1"></label>
       <label>FPS <input name="fps" type="number" min="1" max="120" value="12"></label>
       <label>Ancho <input name="width" type="number" min="64" max="3840" value="640"></label>
       <label>Alto <input name="height" type="number" min="64" max="2160" value="360"></label>
@@ -611,6 +616,14 @@ function renderFormHTML(data) {
 function wireRenderForm(id) {
   const form = $('#render-form');
   if (!form) return;
+  const sceneMode = $('[name="scene_mode"]', form);
+  const syncMode = () => {
+    const fixed = !sceneMode.checked;
+    $('#clip-seconds-field').hidden = !fixed;
+    $('#clip-copies-field').hidden = !fixed;
+  };
+  sceneMode.addEventListener('change', syncMode);
+  syncMode();
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const body = new FormData(form);
@@ -629,6 +642,7 @@ function wireRenderForm(id) {
       ref: body.get('ref'),
       tts_url: body.get('tts_url'),
       chrome: body.get('chrome'),
+      scene_mode: body.get('scene_mode') === 'on',
     };
     const errorBox = $('#render-error');
     errorBox.innerHTML = '';

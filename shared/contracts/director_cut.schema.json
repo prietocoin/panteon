@@ -52,6 +52,32 @@
       "additionalProperties": false,
       "required": ["kind", "title"],
       "properties": {
+        "kind": {"type": "string", "enum": ["title", "cards", "bullets", "code", "beats"]},
+        "title": {"type": "string", "minLength": 1},
+        "subtitle": {"type": "string"},
+        "bullets": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "cards": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/card"}
+        },
+        "code": {"type": "string"},
+        "code_language": {"type": "string"},
+        "beats": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/beat"}
+        }
+      }
+    },
+    "beat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end", "kind", "title"],
+      "properties": {
+        "start": {"type": "number", "minimum": 0, "maximum": 1},
+        "end": {"type": "number", "minimum": 0, "maximum": 1},
         "kind": {"type": "string", "enum": ["title", "cards", "bullets", "code"]},
         "title": {"type": "string", "minLength": 1},
         "subtitle": {"type": "string"},

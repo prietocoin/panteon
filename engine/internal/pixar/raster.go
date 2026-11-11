@@ -138,17 +138,22 @@ func (r *RasterRenderer) drawFrame(clip contract.Clip, width, height int, progre
 	drawGradientRect(img, image.Rect(0, 0, accentWidth, 4), skyColor, greenColor)
 	drawGradientRect(img, image.Rect(accentWidth, 0, width, 4), greenColor, panelColor)
 
-	switch clip.Visual.Kind {
+	visual := clip.Visual
+	if len(clip.Visual.Beats) > 0 {
+		visual = beatVisual(activeBeat(clip.Visual.Beats, progress))
+	}
+
+	switch visual.Kind {
 	case "title":
-		r.drawTitle(img, clip.Visual, progress)
+		r.drawTitle(img, visual, progress)
 	case "cards":
-		r.drawCards(img, clip.Visual, progress)
+		r.drawCards(img, visual, progress)
 	case "bullets":
-		r.drawBullets(img, clip.Visual, progress)
+		r.drawBullets(img, visual, progress)
 	case "code":
-		r.drawCode(img, clip.Visual, progress)
+		r.drawCode(img, visual, progress)
 	default:
-		r.drawTitle(img, clip.Visual, progress)
+		r.drawTitle(img, visual, progress)
 	}
 
 	r.drawFooter(img, clip.ID)
@@ -453,6 +458,30 @@ func fitText(face font.Face, text string, maxWidth int) string {
 		runes = runes[:len(runes)-1]
 	}
 	return string(runes)
+}
+
+func activeBeat(beats []contract.Beat, progress float64) contract.Beat {
+	if len(beats) == 0 {
+		return contract.Beat{}
+	}
+	for _, beat := range beats {
+		if progress >= beat.Start && progress < beat.End {
+			return beat
+		}
+	}
+	return beats[len(beats)-1]
+}
+
+func beatVisual(beat contract.Beat) contract.Visual {
+	return contract.Visual{
+		Kind:         beat.Kind,
+		Title:        beat.Title,
+		Subtitle:     beat.Subtitle,
+		Bullets:      beat.Bullets,
+		Cards:        beat.Cards,
+		Code:         beat.Code,
+		CodeLanguage: beat.CodeLanguage,
+	}
 }
 
 func toneColor(tone string) color.RGBA {

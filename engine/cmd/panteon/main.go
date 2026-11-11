@@ -144,6 +144,7 @@ type pipelineFlags struct {
 	repo        string
 	ref         string
 	githubToken string
+	sceneMode   bool
 	allowReview bool
 	timeout     time.Duration
 	keepAwake   bool
@@ -166,6 +167,7 @@ func (f *pipelineFlags) register(flags *flag.FlagSet, defaultOut string) {
 	flags.StringVar(&f.repo, "repo", "", "repositorio owner/name para --atlas github")
 	flags.StringVar(&f.ref, "ref", "", "rama, tag o commit para --atlas github")
 	flags.StringVar(&f.githubToken, "github-token", "", "token de GitHub (o variable GITHUB_TOKEN)")
+	flags.BoolVar(&f.sceneMode, "scene-mode", false, "genera escenas de duración variable según la narración")
 	flags.BoolVar(&f.allowReview, "allow-review", false, "permite producir casos marcados para revisión")
 	flags.DurationVar(&f.timeout, "timeout", 3*time.Hour, "timeout total del pipeline")
 	flags.BoolVar(&f.keepAwake, "keep-awake", true, "evita la suspensión del sistema durante el render")
@@ -181,6 +183,7 @@ func (f pipelineFlags) config() (pipeline.Config, error) {
 		Height:      f.height,
 		Voice:       f.voice,
 		SynthName:   f.tts,
+		SceneMode:   f.sceneMode,
 		AllowReview: f.allowReview,
 	}
 	switch f.atlasMode {

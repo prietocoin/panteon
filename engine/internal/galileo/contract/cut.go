@@ -43,6 +43,21 @@ type Visual struct {
 	Cards        []Card   `json:"cards,omitempty"`
 	Code         string   `json:"code,omitempty"`
 	CodeLanguage string   `json:"code_language,omitempty"`
+	Beats        []Beat   `json:"beats,omitempty"`
+}
+
+// Beat es un tramo visual dentro de una escena de duración variable.
+// Start y End son fracciones de 0 a 1 de la escena.
+type Beat struct {
+	Start        float64  `json:"start"`
+	End          float64  `json:"end"`
+	Kind         string   `json:"kind"`
+	Title        string   `json:"title"`
+	Subtitle     string   `json:"subtitle,omitempty"`
+	Bullets      []string `json:"bullets,omitempty"`
+	Cards        []Card   `json:"cards,omitempty"`
+	Code         string   `json:"code,omitempty"`
+	CodeLanguage string   `json:"code_language,omitempty"`
 }
 
 // Card es una primitiva atómica de comparación o estado.
@@ -85,7 +100,17 @@ func (c DirectorCut) Validate() error {
 				problems = append(problems, fmt.Sprintf("scenes[%d].clips[%d].duration_sec debe ser > 0", i, j))
 			}
 			if strings.TrimSpace(clip.Visual.Kind) == "" || strings.TrimSpace(clip.Visual.Title) == "" {
-				problems = append(problems, fmt.Sprintf("scenes[%d].clips[%d].visual requiere kind y title", i, j))
+				if len(clip.Visual.Beats) == 0 {
+					problems = append(problems, fmt.Sprintf("scenes[%d].clips[%d].visual requiere kind y title", i, j))
+				}
+			}
+			for k, beat := range clip.Visual.Beats {
+				if beat.Start < 0 || beat.End > 1 || beat.Start >= beat.End {
+					problems = append(problems, fmt.Sprintf("scenes[%d].clips[%d].visual.beats[%d] tiene tiempos inválidos", i, j, k))
+				}
+				if strings.TrimSpace(beat.Kind) == "" || strings.TrimSpace(beat.Title) == "" {
+					problems = append(problems, fmt.Sprintf("scenes[%d].clips[%d].visual.beats[%d] requiere kind y title", i, j, k))
+				}
 			}
 		}
 	}

@@ -46,6 +46,7 @@ type Config struct {
 	Mixer       mozart.Mixer
 	Atlas       atlas.Builder
 	ClipCopies  int
+	SceneMode   bool
 	AllowReview bool
 	Progress    func(Progress)
 	Now         func() time.Time
@@ -158,6 +159,7 @@ func (p *Pipeline) Run(ctx context.Context, engineeringCase contract.Engineering
 	cut, err := cervantes.Write(dossier, cervantes.Options{
 		ClipSeconds: p.config.ClipSeconds,
 		Copies:      p.config.ClipCopies,
+		SceneMode:   p.config.SceneMode,
 		Now:         p.config.Now,
 	})
 	if err != nil {
@@ -180,7 +182,7 @@ func (p *Pipeline) Run(ctx context.Context, engineeringCase contract.Engineering
 		if probed, err := pavarotti.Duration(audio); err == nil && probed > duration {
 			duration = probed
 		}
-		if duration <= 0 || duration > 30 {
+		if duration <= 0 || duration > 600 {
 			return contract.RunManifest{}, fmt.Errorf("pipeline: duración inválida para %s: %.2fs", clip.ID, duration)
 		}
 		clip.DurationSec = duration

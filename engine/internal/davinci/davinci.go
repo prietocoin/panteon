@@ -41,6 +41,7 @@ func buildDocument(clip contract.Clip, width, height int) string {
 	builder.WriteString("<meta charset=\"UTF-8\">\n")
 	builder.WriteString(fmt.Sprintf("<meta name=\"clip-id\" content=\"%s\">\n", html.EscapeString(clip.ID)))
 	builder.WriteString(fmt.Sprintf("<meta name=\"canvas\" content=\"%dx%d\">\n", width, height))
+	builder.WriteString(fmt.Sprintf("<meta name=\"duration\" content=\"%.3f\">\n", clip.DurationSec))
 	builder.WriteString("<title>")
 	builder.WriteString(html.EscapeString(clip.Visual.Title))
 	builder.WriteString("</title>\n<style>")
@@ -49,17 +50,21 @@ func buildDocument(clip contract.Clip, width, height int) string {
 	builder.WriteString("<main class=\"canvas\">\n")
 	builder.WriteString("<div class=\"accent\"></div>\n")
 
-	switch clip.Visual.Kind {
-	case "title":
-		builder.WriteString(renderTitle(clip.Visual))
-	case "cards":
-		builder.WriteString(renderCards(clip.Visual))
-	case "bullets":
-		builder.WriteString(renderBullets(clip.Visual))
-	case "code":
-		builder.WriteString(renderCode(clip.Visual))
-	default:
-		builder.WriteString(renderTitle(clip.Visual))
+	if len(clip.Visual.Beats) > 0 {
+		builder.WriteString(renderBeats(clip.Visual.Beats))
+	} else {
+		switch clip.Visual.Kind {
+		case "title":
+			builder.WriteString(renderTitle(clip.Visual))
+		case "cards":
+			builder.WriteString(renderCards(clip.Visual))
+		case "bullets":
+			builder.WriteString(renderBullets(clip.Visual))
+		case "code":
+			builder.WriteString(renderCode(clip.Visual))
+		default:
+			builder.WriteString(renderTitle(clip.Visual))
+		}
 	}
 
 	builder.WriteString("<footer><span>El Panteón · Galileo</span><span class=\"counter\">")
@@ -67,6 +72,37 @@ func buildDocument(clip contract.Clip, width, height int) string {
 	builder.WriteString("</span></footer>\n<div class=\"progress\"></div>\n</main>\n")
 	builder.WriteString(script())
 	builder.WriteString("\n</body>\n</html>\n")
+	return builder.String()
+}
+
+func renderBeats(beats []contract.Beat) string {
+	var builder strings.Builder
+	for _, beat := range beats {
+		builder.WriteString(fmt.Sprintf(
+			"<div class=\"beat\" data-start=\"%.4f\" data-end=\"%.4f\">\n",
+			beat.Start, beat.End,
+		))
+		visual := contract.Visual{
+			Kind:         beat.Kind,
+			Title:        beat.Title,
+			Subtitle:     beat.Subtitle,
+			Bullets:      beat.Bullets,
+			Cards:        beat.Cards,
+			Code:         beat.Code,
+			CodeLanguage: beat.CodeLanguage,
+		}
+		switch beat.Kind {
+		case "cards":
+			builder.WriteString(renderCards(visual))
+		case "bullets":
+			builder.WriteString(renderBullets(visual))
+		case "code":
+			builder.WriteString(renderCode(visual))
+		default:
+			builder.WriteString(renderTitle(visual))
+		}
+		builder.WriteString("</div>\n")
+	}
 	return builder.String()
 }
 
@@ -205,6 +241,8 @@ footer { position: absolute; left: 6vw; right: 6vw; bottom: 3.4vh; display: flex
   background: linear-gradient(90deg, var(--sky), var(--green)); }
 .reveal { opacity: calc(var(--p) * 1.5 - var(--i) * .12);
   transform: translateY(calc((1 - var(--p)) * 26px)); }
+.beat { display: none; height: 100%%; }
+.beat.active { display: block; }
 `)
 }
 
@@ -214,12 +252,22 @@ func script() string {
   var params = new URLSearchParams(window.location.search);
   var frame = Number(params.get('frame') || 0);
   var total = Math.max(1, Number(params.get('total') || 1));
-  window.setFrame = function (index, count) {
+  var meta = document.querySelector('meta[name="duration"]');
+  var duration = Number(params.get('duration') || (meta ? meta.content : 0)) || 1;
+  window.setFrame = function (index, count, seconds) {
     var p = count <= 1 ? 1 : index / (count - 1);
-    document.documentElement.style.setProperty('--p', String(Math.max(0, Math.min(1, p))));
+    p = Math.max(0, Math.min(1, p));
+    document.documentElement.style.setProperty('--p', String(p));
+    var d = Number(seconds) || duration;
+    var t = p * d;
+    document.querySelectorAll('.beat').forEach(function (beat) {
+      var start = Number(beat.dataset.start || 0) * d;
+      var end = Number(beat.dataset.end || 1) * d;
+      beat.classList.toggle('active', t >= start && (t < end || (p >= 1 && t <= end)));
+    });
   };
   window.advanceAnimation = window.setFrame;
-  window.setFrame(frame, total);
+  window.setFrame(frame, total, duration);
 })();
 </script>`
 }

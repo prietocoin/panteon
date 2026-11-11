@@ -86,6 +86,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-ffmpeg.ps1
 | `--repo` | inferido de `source.url` | Repositorio `owner/name` |
 | `--ref` | rama por defecto | Rama, tag o commit |
 | `--github-token` | `GITHUB_TOKEN` | Token para subir el rate limit |
+| `--scene-mode` | `false` | Escenas de duración variable según la narración |
 | `--allow-review` | `false` | Permite producir casos con veredicto `review` |
 | `--clip-copies` | `1` | Repite la secuencia N veces (pruebas de carga) |
 | `--timeout` | `3h` | Timeout total del pipeline |
@@ -168,6 +169,24 @@ Esto produce 36 clips atómicos de 20 s = **12 minutos**, 43.200 frames a 1080p6
 `--keep-awake` usa `SetThreadExecutionState` para que Windows no suspenda el equipo.
 Si el equipo duerme de todos modos, el timeout de 24 h evita que el proceso muera y
 la caché permite reanudar.
+
+## Modo escenas (duración variable)
+
+La unidad narrativa es la **escena/bloque**, no un clip fijo de 20 s. Una escena puede
+durar 60 s, 115 s, 3 min o lo que pida la narración.
+
+- Cervantes genera escenas con `narration`, `visual.beats` y una duración estimada.
+- Pavarotti sintetiza la escena completa y la duración real del audio manda.
+- Da Vinci/Pixar recorren los `beats` visuales dentro de la escena.
+- El render escribe frames de forma secuencial; no se corta la narración.
+
+La UI tiene la opción **Guion por escenas**. Si se desactiva, vuelve al modo legado de
+clips fijos.
+
+Limitación actual: el guion determinista usa solo el caso y su dossier. Un caso corto
+produce un vídeo corto (el caso de prueba genera ~114 s en 6 escenas). Para 12 min
+hace falta un guion completo de ~1.800–2.000 palabras, que debe escribir un LLM o una
+persona. No se rellena con repeticiones.
 
 ## Ingesta de casos
 
