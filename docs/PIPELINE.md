@@ -171,20 +171,28 @@ la caché permite reanudar.
 
 ## Ingesta de casos
 
-Hoy un caso entra de dos formas:
+Un caso puede entrar de tres formas:
 
 1. **UI**: `Nuevo caso` → URL o texto → Galileo.
-2. **API**:
+2. **API**: `POST /api/cases`.
+3. **Watcher**: página `Fuentes` con RSS/Atom o GitHub issues.
 
-```bash
-curl -X POST http://localhost:8080/api/cases \
-  -H "Content-Type: application/json" \
-  -d '{"url":"https://ejemplo.com/postmortem"}'
+El watcher revisa cada minuto las fuentes vencidas, deduplica, ejecuta Galileo y
+guarda el caso. Los resultados se registran como eventos (`created`, `skipped`,
+`error`) y se pueden notificar por webhook o Telegram:
+
+```env
+PANTEON_NOTIFY_WEBHOOK=https://discord.com/api/webhooks/...
+PANTEON_TELEGRAM_TOKEN=...
+PANTEON_TELEGRAM_CHAT_ID=...
 ```
 
+Limitación: Galileo necesita encabezados reconocibles (Symptom/Cause/Solution o sus
+variantes). Si un feed trae prosa sin esa estructura, el evento queda como `error`
+y no se crea el caso.
+
 El dashboard se refresca cada 8 segundos y muestra un aviso cuando aparece un caso
-nuevo o termina un render. No hay todavía un watcher automático de RSS, GitHub,
-correo o webhooks; eso sería el siguiente módulo de ingesta.
+nuevo o termina un render.
 
 ## UI embebida
 

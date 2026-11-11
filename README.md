@@ -113,7 +113,36 @@ revisión Anti-Hype, dossier/guion/runs, lanzador de renders y progreso en vivo 
 La UI va embebida en el binario: no requiere Node ni un servidor aparte.
 
 Los casos también se pueden crear por API (`POST /api/cases`) y el dashboard los
-detecta automáticamente con un aviso. Todavía no hay watcher de RSS/GitHub/email.
+detecta automáticamente con un aviso.
+
+## Watcher de fuentes
+
+La página **Fuentes** permite añadir:
+
+- **RSS/Atom**: blogs de ingeniería y post-mortems.
+- **GitHub issues**: repositorios concretos.
+
+El watcher revisa cada minuto las fuentes vencidas, deduplica por contenido, ejecuta
+Galileo y guarda el caso. Los eventos (`created`, `skipped`, `error`) se ven en la UI.
+
+Avisos fuera de la app:
+
+```env
+PANTEON_NOTIFY_WEBHOOK=https://discord.com/api/webhooks/...
+# o Telegram:
+PANTEON_TELEGRAM_TOKEN=...
+PANTEON_TELEGRAM_CHAT_ID=...
+```
+
+## PWA para el móvil
+
+La UI es una PWA instalable:
+
+- Abre el dominio en el navegador del teléfono.
+- Usa **Instalar app** o “Añadir a pantalla de inicio”.
+- El dashboard se refresca cada 8 s y muestra un aviso al entrar un caso nuevo.
+- Las notificaciones en segundo plano se envían por Discord/Telegram; el push web
+  nativo aún no está implementado.
 
 ## FFmpeg portable
 

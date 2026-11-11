@@ -81,6 +81,20 @@ PANTEON_SEED=false
 `PANTEON_SEED=false` evita que el contenedor cree un caso demo al arrancar. Cámbialo
 a `true` si quieres un caso de ejemplo en el primer despliegue.
 
+## Notificaciones y PWA
+
+- PWA: la UI se instala desde el navegador del móvil (manifest + service worker).
+- Alertas fuera de la app:
+
+```env
+PANTEON_NOTIFY_WEBHOOK=https://discord.com/api/webhooks/...
+PANTEON_TELEGRAM_TOKEN=...
+PANTEON_TELEGRAM_CHAT_ID=...
+```
+
+El watcher de fuentes guarda su estado en `/workspace/ingest`; mantén el volumen para
+no perder fuentes, eventos y deduplicación.
+
 ## GPU
 
 Por defecto se instala PyTorch CPU. Para GPU NVIDIA:
