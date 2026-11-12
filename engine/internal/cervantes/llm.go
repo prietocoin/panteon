@@ -34,6 +34,20 @@ func NewLLMWriterFromEnv() *LLMWriter {
 	base := strings.TrimSpace(os.Getenv("PANTEON_LLM_BASE_URL"))
 	model := strings.TrimSpace(os.Getenv("PANTEON_LLM_MODEL"))
 	key := strings.TrimSpace(os.Getenv("PANTEON_LLM_API_KEY"))
+
+	// Alias cómodo para DeepSeek: PANTEON_LLM_DEEPSEEK=sk-...
+	if key == "" {
+		key = strings.TrimSpace(os.Getenv("PANTEON_LLM_DEEPSEEK"))
+		if key != "" {
+			if base == "" {
+				base = "https://api.deepseek.com/v1"
+			}
+			if model == "" {
+				model = "deepseek-chat"
+			}
+		}
+	}
+
 	if base == "" || model == "" || key == "" {
 		return nil
 	}
